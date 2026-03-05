@@ -6,427 +6,9 @@
     <title>التقييم قبل التخدير | Pre‑Anesthetic Screening</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2a6b7f;
-            --primary-light: #e8f4f8;
-            --secondary: #d8a356;
-            --text: #2c3e50;
-            --text-light: #5a6c7d;
-            --bg: #f8f9fa;
-            --white: #ffffff;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --danger: #f44336;
-            --radius: 16px;
-            --radius-sm: 8px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-light: 0 2px 6px rgba(0, 0, 0, 0.05);
-            --transition: all 0.3s ease;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding-top: 100px;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Montserrat', sans-serif;
-            line-height: 1.6;
-        }
-
-        body[dir="rtl"] {
-            font-family: 'Cairo', sans-serif;
-        }
-
-        /* Header */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: linear-gradient(135deg, var(--white) 0%, #f8f9fa 100%);
-            padding: 0.8rem 0;
-            z-index: 1000;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-            transition: var(--transition);
-            border-bottom: 3px solid var(--primary);
-        }
-
-        header.scrolled {
-            padding: 0.5rem 0;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .header-main {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-content h1 {
-            margin: 0;
-            color: var(--primary);
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-content h1 i {
-            color: var(--secondary);
-            font-size: 2rem;
-        }
-
-        .tagline {
-            margin: 5px 0 0;
-            color: var(--text-light);
-            font-size: 1rem;
-            font-weight: 400;
-            max-width: 600px;
-        }
-
-        header.scrolled .tagline {
-            display: none;
-        }
-
-        /* Language Selector */
-        .lang-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .lang-selector label {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .lang-selector select {
-            padding: 8px 25px 8px 12px;
-            border: 2px solid var(--primary-light);
-            border-radius: 30px;
-            background: white;
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--primary);
-            cursor: pointer;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .lang-selector select:hover {
-            border-color: var(--primary);
-        }
-
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Main layout */
-        .main-grid {
-            display: flex;
-            flex-direction: row;
-            gap: 25px;
-            flex-wrap: wrap;
-        }
-
-        .form-panel {
-            flex: 2;
-            min-width: 320px;
-        }
-
-        .rec-panel {
-            flex: 1;
-            min-width: 280px;
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 25px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
-            height: fit-content;
-            position: sticky;
-            top: 120px;
-        }
-
-        body[dir="rtl"] .rec-panel {
-            border-left: none;
-            border-right: 4px solid var(--primary);
-        }
-
-        /* Sections */
-        .section {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            border-left: 4px solid var(--primary);
-        }
-
-        body[dir="rtl"] .section {
-            border-left: none;
-            border-right: 4px solid var(--primary);
-        }
-
-        .section:hover {
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary-light);
-            padding-bottom: 12px;
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .section-title i {
-            color: var(--secondary);
-        }
-
-        /* Form elements */
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            flex: 1 1 200px;
-        }
-
-        label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: var(--radius-sm);
-            font-family: inherit;
-            font-size: 16px;
-            background: white;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(42, 107, 127, 0.1);
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            margin-top: 8px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            min-width: 140px;
-        }
-
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-            accent-color: var(--primary);
-        }
-
-        .checkbox-item label {
-            margin: 0;
-            font-weight: 400;
-            font-size: 15px;
-            color: var(--text);
-        }
-
-        /* Recommendations panel */
-        .rec-box {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 15px;
-        }
-
-        .rec-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .rec-list li {
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            background: white;
-            border-radius: 40px;
-            font-size: 15px;
-            color: var(--text);
-            border-left: 5px solid var(--primary);
-            box-shadow: var(--shadow-light);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        body[dir="rtl"] .rec-list li {
-            border-left: none;
-            border-right: 5px solid var(--primary);
-        }
-
-        .rec-list li.rec-yes {
-            background: #d4edda;
-            border-left-color: var(--success);
-            font-weight: 500;
-        }
-
-        body[dir="rtl"] .rec-list li.rec-yes {
-            border-right-color: var(--success);
-        }
-
-        .rec-list li.rec-no {
-            background: #f8f9fa;
-            border-left-color: #adb5bd;
-            color: #6c757d;
-        }
-
-        body[dir="rtl"] .rec-list li.rec-no {
-            border-right-color: #adb5bd;
-        }
-
-        .rec-note {
-            font-size: 13px;
-            color: var(--text-light);
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        /* Consent area */
-        .consent-area {
-            background: var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 18px;
-            margin: 25px 0 10px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            border: 1px solid var(--primary);
-        }
-
-        .consent-area input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            margin-top: 2px;
-            flex-shrink: 0;
-            accent-color: var(--primary);
-        }
-
-        .consent-area label {
-            font-size: 15px;
-            font-weight: 400;
-            color: var(--text);
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        /* Buttons */
-        button {
-            background: linear-gradient(135deg, var(--primary) 0%, #1d5668 100%);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 40px;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(42, 107, 127, 0.3);
-        }
-
-        button:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .status-message {
-            text-align: center;
-            margin-top: 15px;
-            font-weight: 500;
-        }
-
-        /* Footer */
-        footer {
-            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
-            color: white;
-            padding: 3rem 0;
-            margin-top: 4rem;
-            text-align: center;
-        }
-
-        footer p {
-            margin: 10px 0;
-            opacity: 0.9;
-        }
-
-        footer strong {
-            font-size: 1.2rem;
-            color: var(--secondary);
-        }
-
-        /* Responsive */
-        @media (max-width: 800px) {
-            .main-grid {
-                flex-direction: column;
-            }
-            .rec-panel {
-                position: static;
-                width: 100%;
-            }
-            body {
-                padding-top: 120px;
-            }
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <!-- Tesseract.js for OCR -->
+    <script src='https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js'></script>
 </head>
 <body>
     <header id="main-header">
@@ -434,7 +16,7 @@
             <div class="header-content">
                 <div class="header-main">
                     <h1><i class="fas fa-stethoscope"></i> <span id="header-title">التقييم قبل التخدير</span></h1>
-                    <p class="tagline" id="header-tagline">نموذج شامل لتقييم الحالة قبل العملية</p>
+                    <p class="tagline" id="header-tagline">نموذج مبسط لتقييم حالتك قبل العملية</p>
                 </div>
                 <div class="lang-selector">
                     <label for="langSelect" id="lang-label">🌐 اللغة</label>
@@ -460,7 +42,7 @@
                 <form id="screeningForm">
                     <!-- Demographics -->
                     <div class="section">
-                        <h2 class="section-title" id="demographics-title"><i class="fas fa-user"></i> بيانات المريض</h2>
+                        <h2 class="section-title" id="demographics-title"><i class="fas fa-user"></i> بياناتك</h2>
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="fullName" id="label-fullName">الاسم الكامل *</label>
@@ -489,38 +71,69 @@
                                 <input type="number" id="height" step="0.1" data-i18n-placeholder="placeholder-height">
                             </div>
                             <div class="form-group">
-                                <label for="contact" id="label-contact">رقم الاتصال</label>
+                                <label for="contact" id="label-contact">رقم الهاتف</label>
                                 <input type="tel" id="contact" data-i18n-placeholder="placeholder-contact">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Medical History -->
+                    <!-- Medical History - Grouped by System -->
                     <div class="section">
-                        <h2 class="section-title" id="medical-title"><i class="fas fa-notes-medical"></i> التاريخ الطبي</h2>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item"><input type="checkbox" id="hypertension"><label for="hypertension" id="label-hypertension">ارتفاع ضغط الدم</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="diabetes"><label for="diabetes" id="label-diabetes">داء السكري</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="cad"><label for="cad" id="label-cad">مرض الشريان التاجي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="heartFailure"><label for="heartFailure" id="label-heartFailure">فشل القلب</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="atrialFib"><label for="atrialFib" id="label-atrialFib">رجفان أذيني</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="stroke"><label for="stroke" id="label-stroke">سكتة دماغية / نوبة نقص تروية عابرة</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="copd"><label for="copd" id="label-copd">مرض رئوي مزمن / ربو</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="ckd"><label for="ckd" id="label-ckd">مرض كلوي مزمن</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="liverDisease"><label for="liverDisease" id="label-liverDisease">مرض كبدي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="bleedingDisorder"><label for="bleedingDisorder" id="label-bleedingDisorder">اضطراب نزفي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="murmur"><label for="murmur" id="label-murmur">لغط قلبي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="carotidBruit"><label for="carotidBruit" id="label-carotidBruit">لغط سباتي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="anticoagulants"><label for="anticoagulants" id="label-anticoagulants">يتناول مضادات تخثر</label></div>
+                        <h2 class="section-title" id="medical-title"><i class="fas fa-notes-medical"></i> التاريخ الصحي</h2>
+                        
+                        <!-- Cardiac Diseases -->
+                        <div class="system-card">
+                            <h3><i class="fas fa-heart" style="color: #dc3545;"></i> <span id="cardiac-title">أمراض القلب</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="hypertension"><label for="hypertension" id="label-hypertension">ضغط الدم المرتفع</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cad"><label for="cad" id="label-cad">تضيق شرايين القلب</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="heartFailure"><label for="heartFailure" id="label-heartFailure">ضعف عضلة القلب</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="atrialFib"><label for="atrialFib" id="label-atrialFib">اضطراب نبضات القلب (رجفان)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="murmur"><label for="murmur" id="label-murmur">لغط (شوشرة) في القلب</label></div>
+                            </div>
                         </div>
-                        <!-- extra -->
-                        <div style="margin-top:15px;" class="checkbox-group">
-                            <div class="checkbox-item"><input type="checkbox" id="sleepApnea"><label for="sleepApnea" id="label-sleepApnea">انقطاع النفس النومي</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gerd"><label for="gerd" id="label-gerd">ارتجاع مريئي</label></div>
+
+                        <!-- Neurological Diseases -->
+                        <div class="system-card">
+                            <h3><i class="fas fa-brain" style="color: #6610f2;"></i> <span id="neuro-title">أمراض الأعصاب</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="stroke"><label for="stroke" id="label-stroke">جلطة دماغية سابقة</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="carotidBruit"><label for="carotidBruit" id="label-carotidBruit">لغط في شريان الرقبة</label></div>
+                            </div>
                         </div>
-                        <!-- Other medical conditions moved to bottom -->
-                        <div style="margin-top:15px;">
-                            <label for="otherMedical" id="label-otherMedical">حالات طبية أخرى (حدد)</label>
+
+                        <!-- Respiratory Diseases -->
+                        <div class="system-card">
+                            <h3><i class="fas fa-lungs" style="color: #0dcaf0;"></i> <span id="respiratory-title">أمراض الجهاز التنفسي</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="copd"><label for="copd" id="label-copd">مرض رئوي مزمن / ربو</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="sleepApnea"><label for="sleepApnea" id="label-sleepApnea">انقطاع النفس أثناء النوم</label></div>
+                            </div>
+                        </div>
+
+                        <!-- Kidney / Liver / Blood -->
+                        <div class="system-card">
+                            <h3><i class="fas fa-kidneys" style="color: #fd7e14;"></i> <span id="renal-title">الكبد والكلى والدم</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="ckd"><label for="ckd" id="label-ckd">أمراض الكلى المزمنة</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="liverDisease"><label for="liverDisease" id="label-liverDisease">أمراض الكبد</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="bleedingDisorder"><label for="bleedingDisorder" id="label-bleedingDisorder">اضطرابات النزيف (سيولة)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="anticoagulants"><label for="anticoagulants" id="label-anticoagulants">أدوية مميعة للدم</label></div>
+                            </div>
+                        </div>
+
+                        <!-- Metabolic / Other -->
+                        <div class="system-card">
+                            <h3><i class="fas fa-balance-scale" style="color: #6c757d;"></i> <span id="metabolic-title">أمراض أخرى</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="diabetes"><label for="diabetes" id="label-diabetes">السكري</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gerd"><label for="gerd" id="label-gerd">ارتجاع المريء</label></div>
+                            </div>
+                        </div>
+
+                        <!-- Other medical conditions (text) -->
+                        <div style="margin-top:20px;">
+                            <label for="otherMedical" id="label-otherMedical">حالات أخرى (مثل باركنسون، الغدة الدرقية...)</label>
                             <input type="text" id="otherMedical" data-i18n-placeholder="placeholder-otherMedical">
                         </div>
                     </div>
@@ -529,24 +142,32 @@
                     <div class="section">
                         <h2 class="section-title" id="symptoms-title"><i class="fas fa-thermometer-half"></i> الأعراض الحالية</h2>
                         <div class="checkbox-group">
-                            <div class="checkbox-item"><input type="checkbox" id="chestPain"><label for="chestPain" id="label-chestPain">ألم / انزعاج في الصدر</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="palpitations"><label for="palpitations" id="label-palpitations">خفقان</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="dyspnea"><label for="dyspnea" id="label-dyspnea">ضيق نفس</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="syncope"><label for="syncope" id="label-syncope">إغماء / شبه إغماء</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="fatigue"><label for="fatigue" id="label-fatigue">تعب / عدم تحمل جهد</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="noSymptoms"><label for="noSymptoms" id="label-noSymptoms">لا شيء مما سبق</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="chestPain"><label for="chestPain" id="label-chestPain">ألم في الصدر</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="palpitations"><label for="palpitations" id="label-palpitations">خفقان / دقات قلب سريعة</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dyspnea"><label for="dyspnea" id="label-dyspnea">ضيق في النفس</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="syncope"><label for="syncope" id="label-syncope">إغماء / دوخة شديدة</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fatigue"><label for="fatigue" id="label-fatigue">تعب شديد عند أقل مجهود</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="noSymptoms"><label for="noSymptoms" id="label-noSymptoms">لا توجد أعراض</label></div>
                         </div>
                     </div>
 
-                    <!-- Medications & Allergies -->
+                    <!-- Medications & Allergies - with OCR -->
                     <div class="section">
-                        <h2 class="section-title" id="meds-title"><i class="fas fa-pills"></i> الأدوية والحساسيات</h2>
+                        <h2 class="section-title" id="meds-title"><i class="fas fa-pills"></i> الأدوية والحساسية</h2>
                         <div class="form-group">
-                            <label for="medications" id="label-medications">الأدوية الحالية (بما في ذلك المتاحة دون وصفة والأعشاب)</label>
+                            <label for="medications" id="label-medications">الأدوية التي تتناولها (الأسماء والجرعات)</label>
                             <textarea id="medications" rows="3" data-i18n-placeholder="placeholder-medications"></textarea>
                         </div>
+                        
+                        <!-- OCR Button & File Input -->
+                        <div style="display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap;">
+                            <button type="button" id="scanMedsBtn" class="secondary-btn"><i class="fas fa-camera"></i> <span id="scan-btn-text">تصوير الدواء</span></button>
+                            <input type="file" id="medImageInput" accept="image/*" capture="environment" style="display: none;">
+                            <span id="ocrStatus" style="color: var(--primary); align-self: center;"></span>
+                        </div>
+
                         <div class="form-group" style="margin-top:15px;">
-                            <label for="allergies" id="label-allergies">الحساسيات (أدوية، طعام، لاتكس، إلخ)</label>
+                            <label for="allergies" id="label-allergies">الحساسية من (دواء، طعام، لاتكس...)</label>
                             <textarea id="allergies" rows="2" data-i18n-placeholder="placeholder-allergies"></textarea>
                         </div>
                     </div>
@@ -558,49 +179,49 @@
                             <div class="form-group">
                                 <label for="smoking" id="label-smoking">التدخين</label>
                                 <select id="smoking">
-                                    <option value="Never" id="smoking-never">لم يدخن قط</option>
-                                    <option value="Former" id="smoking-former">مدخن سابق</option>
-                                    <option value="Current" id="smoking-current">مدخن حالي</option>
+                                    <option value="Never" id="smoking-never">لا أدخن</option>
+                                    <option value="Former" id="smoking-former">كنت أدخن سابقاً</option>
+                                    <option value="Current" id="smoking-current">أدخن حالياً</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="alcohol" id="label-alcohol">الكحول</label>
                                 <select id="alcohol">
-                                    <option value="None" id="alcohol-none">لا يتناول</option>
-                                    <option value="Moderate" id="alcohol-moderate">باعتدال</option>
-                                    <option value="Heavy" id="alcohol-heavy">بكثرة</option>
+                                    <option value="None" id="alcohol-none">لا أتناول</option>
+                                    <option value="Moderate" id="alcohol-moderate">قليلاً</option>
+                                    <option value="Heavy" id="alcohol-heavy">كثيراً</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="surgicalHistory" id="label-surgicalHistory">التاريخ الجراحي (العمليات السابقة)</label>
+                            <label for="surgicalHistory" id="label-surgicalHistory">العمليات الجراحية السابقة</label>
                             <textarea id="surgicalHistory" rows="2" data-i18n-placeholder="placeholder-surgicalHistory"></textarea>
                         </div>
                         <div style="margin-top:15px;">
-                            <label for="dental" id="label-dental">مشاكل الأسنان (مكسور، مفكوك، أطقم، إلخ)</label>
+                            <label for="dental" id="label-dental">مشاكل الأسنان (أسنان مكسورة، أطقم...)</label>
                             <input type="text" id="dental" data-i18n-placeholder="placeholder-dental">
                         </div>
                     </div>
 
-                    <!-- Vital Signs (now after Additional) -->
+                    <!-- Vital Signs -->
                     <div class="section">
                         <h2 class="section-title" id="vitals-title"><i class="fas fa-heartbeat"></i> العلامات الحيوية (اختياري)</h2>
                         <div class="form-row">
-                            <div class="form-group"><label for="bpSystolic" id="label-bpSystolic">الضغط الانقباضي (ملم زئبق)</label><input type="number" id="bpSystolic" data-i18n-placeholder="placeholder-bpSystolic"></div>
-                            <div class="form-group"><label for="bpDiastolic" id="label-bpDiastolic">الضغط الانبساطي (ملم زئبق)</label><input type="number" id="bpDiastolic" data-i18n-placeholder="placeholder-bpDiastolic"></div>
-                            <div class="form-group"><label for="heartRate" id="label-heartRate">معدل ضربات القلب (نبضة/د)</label><input type="number" id="heartRate" data-i18n-placeholder="placeholder-heartRate"></div>
+                            <div class="form-group"><label for="bpSystolic" id="label-bpSystolic">الضغط الانقباضي</label><input type="number" id="bpSystolic" data-i18n-placeholder="placeholder-bpSystolic"></div>
+                            <div class="form-group"><label for="bpDiastolic" id="label-bpDiastolic">الضغط الانبساطي</label><input type="number" id="bpDiastolic" data-i18n-placeholder="placeholder-bpDiastolic"></div>
+                            <div class="form-group"><label for="heartRate" id="label-heartRate">نبضات القلب</label><input type="number" id="heartRate" data-i18n-placeholder="placeholder-heartRate"></div>
                         </div>
                         <div class="form-row">
                             <div class="form-group"><label for="respRate" id="label-respRate">معدل التنفس</label><input type="number" id="respRate" data-i18n-placeholder="placeholder-respRate"></div>
-                            <div class="form-group"><label for="spo2" id="label-spo2">تشبع الأكسجين (%)</label><input type="number" id="spo2" min="0" max="100" data-i18n-placeholder="placeholder-spo2"></div>
-                            <div class="form-group"><label for="temperature" id="label-temperature">درجة الحرارة (°C)</label><input type="number" id="temperature" step="0.1" data-i18n-placeholder="placeholder-temperature"></div>
+                            <div class="form-group"><label for="spo2" id="label-spo2">نسبة الأوكسجين (%)</label><input type="number" id="spo2" min="0" max="100" data-i18n-placeholder="placeholder-spo2"></div>
+                            <div class="form-group"><label for="temperature" id="label-temperature">درجة الحرارة</label><input type="number" id="temperature" step="0.1" data-i18n-placeholder="placeholder-temperature"></div>
                         </div>
                     </div>
 
                     <!-- Consent -->
                     <div class="consent-area">
                         <input type="checkbox" id="consentCheck" required>
-                        <label for="consentCheck" id="consent-text">أوافق على ملء هذا النموذج طواعية ودون أي التزامات، وأفرج عن فريق التخدير من أي مسؤولية قانونية في المستقبل تتعلق بالمعلومات المقدمة.</label>
+                        <label for="consentCheck" id="consent-text">أوافق على ملء هذا النموذج طواعية، وأعلم أن المعلومات ستساعد فريق التخدير على تقديم الرعاية الآمنة.</label>
                     </div>
 
                     <button type="submit" id="submit-btn"><i class="fas fa-save"></i> حفظ في ورقة جوجل</button>
@@ -615,15 +236,15 @@
                     <ul class="rec-list" id="recList">
                         <li class="rec-no" id="recCardio">استشارة قلبية</li>
                         <li class="rec-no" id="recNeuro">استشارة عصبية</li>
-                        <li class="rec-no" id="recEcho">تخطيط صدى القلب</li>
-                        <li class="rec-no" id="recEcg">تخطيط كهربية القلب</li>
-                        <li class="rec-no" id="recCarotid">دوبلر سباتي</li>
-                        <li class="rec-no" id="recLabs">فحوصات مخبرية</li>
+                        <li class="rec-no" id="recEcho">إيكو قلب</li>
+                        <li class="rec-no" id="recEcg">تخطيط قلب</li>
+                        <li class="rec-no" id="recCarotid">دوبلر لأوعية الرقبة</li>
+                        <li class="rec-no" id="recLabs">تحاليل مخبرية</li>
                         <li class="rec-no" id="recHaematology">استشارة أمراض الدم</li>
                         <li class="rec-no" id="recNephrology">استشارة الكلى</li>
                         <li class="rec-no" id="recPulmonary">استشارة صدرية</li>
                     </ul>
-                    <p class="rec-note" id="rec-note">بناءً على المعلومات المدخلة، تظهر التوصيات أعلاه.</p>
+                    <p class="rec-note" id="rec-note">بناءً على معلوماتك، هذه التوصيات تساعد طبيبك.</p>
                 </div>
             </div>
         </div>
@@ -631,513 +252,10 @@
 
     <footer>
         <div class="container">
-            <p><strong>فريق التخدير</strong></p>
-            <p>نحن هنا لمساعدتك</p>
+            <p><strong>فريق التخدير</strong> – نحن هنا لمساعدتك</p>
         </div>
     </footer>
 
-    <script>
-        (function() {
-            // ==================== TRANSLATIONS ====================
-            const translations = {
-                ar: {
-                    "lang-label": "🌐 اللغة",
-                    "header-title": "التقييم قبل التخدير",
-                    "header-tagline": "نموذج شامل لتقييم الحالة قبل العملية",
-                    "demographics-title": "بيانات المريض",
-                    "label-fullName": "الاسم الكامل *",
-                    "placeholder-fullName": "أدخل الاسم الكامل",
-                    "label-age": "العمر *",
-                    "placeholder-age": "أدخل العمر",
-                    "label-sex": "الجنس",
-                    "sex-option-none": "-- اختر --",
-                    "sex-option-male": "ذكر",
-                    "sex-option-female": "أنثى",
-                    "label-weight": "الوزن (كغ)",
-                    "placeholder-weight": "أدخل الوزن",
-                    "label-height": "الطول (سم)",
-                    "placeholder-height": "أدخل الطول",
-                    "label-contact": "رقم الاتصال",
-                    "placeholder-contact": "أدخل رقم الهاتف",
-                    "medical-title": "التاريخ الطبي",
-                    "label-hypertension": "ارتفاع ضغط الدم",
-                    "label-diabetes": "داء السكري",
-                    "label-cad": "مرض الشريان التاجي",
-                    "label-heartFailure": "فشل القلب",
-                    "label-atrialFib": "رجفان أذيني",
-                    "label-stroke": "سكتة دماغية / نوبة نقص تروية عابرة",
-                    "label-copd": "مرض رئوي مزمن / ربو",
-                    "label-ckd": "مرض كلوي مزمن",
-                    "label-liverDisease": "مرض كبدي",
-                    "label-bleedingDisorder": "اضطراب نزفي",
-                    "label-murmur": "لغط قلبي",
-                    "label-carotidBruit": "لغط سباتي",
-                    "label-anticoagulants": "يتناول مضادات تخثر",
-                    "label-otherMedical": "حالات طبية أخرى (حدد)",
-                    "placeholder-otherMedical": "مثل: باركنسون، أمراض الغدة...",
-                    "label-sleepApnea": "انقطاع النفس النومي",
-                    "label-gerd": "ارتجاع مريئي",
-                    "symptoms-title": "الأعراض الحالية",
-                    "label-chestPain": "ألم / انزعاج في الصدر",
-                    "label-palpitations": "خفقان",
-                    "label-dyspnea": "ضيق نفس",
-                    "label-syncope": "إغماء / شبه إغماء",
-                    "label-fatigue": "تعب / عدم تحمل جهد",
-                    "label-noSymptoms": "لا شيء مما سبق",
-                    "meds-title": "الأدوية والحساسيات",
-                    "label-medications": "الأدوية الحالية (بما في ذلك المتاحة دون وصفة والأعشاب)",
-                    "placeholder-medications": "أسماء الأدوية والجرعات...",
-                    "label-allergies": "الحساسيات (أدوية، طعام، لاتكس، إلخ)",
-                    "placeholder-allergies": "مثل: بنسلين، لاتكس...",
-                    "additional-title": "معلومات إضافية",
-                    "label-smoking": "التدخين",
-                    "smoking-never": "لم يدخن قط",
-                    "smoking-former": "مدخن سابق",
-                    "smoking-current": "مدخن حالي",
-                    "label-alcohol": "الكحول",
-                    "alcohol-none": "لا يتناول",
-                    "alcohol-moderate": "باعتدال",
-                    "alcohol-heavy": "بكثرة",
-                    "label-surgicalHistory": "التاريخ الجراحي (العمليات السابقة)",
-                    "placeholder-surgicalHistory": "أدرج العمليات مع التواريخ...",
-                    "label-dental": "مشاكل الأسنان (مكسور، مفكوك، أطقم، إلخ)",
-                    "placeholder-dental": "مثال: أسنان مفكوكة، تيجان",
-                    "vitals-title": "العلامات الحيوية (اختياري)",
-                    "label-bpSystolic": "الضغط الانقباضي (ملم زئبق)",
-                    "placeholder-bpSystolic": "الانقباضي",
-                    "label-bpDiastolic": "الضغط الانبساطي (ملم زئبق)",
-                    "placeholder-bpDiastolic": "الانبساطي",
-                    "label-heartRate": "معدل ضربات القلب (نبضة/د)",
-                    "placeholder-heartRate": "النبض",
-                    "label-respRate": "معدل التنفس",
-                    "placeholder-respRate": "التنفس",
-                    "label-spo2": "تشبع الأكسجين (%)",
-                    "placeholder-spo2": "SpO₂",
-                    "label-temperature": "درجة الحرارة (°C)",
-                    "placeholder-temperature": "الحرارة",
-                    "consent-text": "أوافق على ملء هذا النموذج طواعية ودون أي التزامات، وأفرج عن فريق التخدير من أي مسؤولية قانونية في المستقبل تتعلق بالمعلومات المقدمة.",
-                    "rec-title": "التوصيات الفورية",
-                    "rec-note": "بناءً على المعلومات المدخلة، تظهر التوصيات أعلاه.",
-                    "recCardio": "استشارة قلبية",
-                    "recNeuro": "استشارة عصبية",
-                    "recEcho": "تخطيط صدى القلب",
-                    "recEcg": "تخطيط كهربية القلب",
-                    "recCarotid": "دوبلر سباتي",
-                    "recLabs": "فحوصات مخبرية",
-                    "recHaematology": "استشارة أمراض الدم",
-                    "recNephrology": "استشارة الكلى",
-                    "recPulmonary": "استشارة صدرية",
-                    "submit-btn": "حفظ في ورقة جوجل",
-                    "status-submitting": "جاري الإرسال...",
-                    "error-age": "❌ العمر مطلوب.",
-                    "error-name": "❌ الاسم الكامل مطلوب.",
-                    "success": "✅ تم حفظ البيانات بنجاح!",
-                    "error": "❌ حدث خطأ في حفظ البيانات."
-                },
-                en: {
-                    "lang-label": "🌐 Language",
-                    "header-title": "Pre‑Anesthetic Screening",
-                    "header-tagline": "Comprehensive preoperative assessment form",
-                    "demographics-title": "Patient Demographics",
-                    "label-fullName": "Full Name *",
-                    "placeholder-fullName": "Enter full name",
-                    "label-age": "Age *",
-                    "placeholder-age": "Enter age",
-                    "label-sex": "Sex",
-                    "sex-option-none": "-- Select --",
-                    "sex-option-male": "Male",
-                    "sex-option-female": "Female",
-                    "label-weight": "Weight (kg)",
-                    "placeholder-weight": "Enter weight",
-                    "label-height": "Height (cm)",
-                    "placeholder-height": "Enter height",
-                    "label-contact": "Contact Number",
-                    "placeholder-contact": "Enter phone number",
-                    "medical-title": "Medical History",
-                    "label-hypertension": "Hypertension",
-                    "label-diabetes": "Diabetes Mellitus",
-                    "label-cad": "Coronary Artery Disease",
-                    "label-heartFailure": "Heart Failure",
-                    "label-atrialFib": "Atrial Fibrillation",
-                    "label-stroke": "Stroke / TIA",
-                    "label-copd": "COPD / Asthma",
-                    "label-ckd": "Chronic Kidney Disease",
-                    "label-liverDisease": "Liver Disease",
-                    "label-bleedingDisorder": "Bleeding Disorder",
-                    "label-murmur": "Heart Murmur",
-                    "label-carotidBruit": "Carotid Bruit",
-                    "label-anticoagulants": "On Anticoagulants",
-                    "label-otherMedical": "Other medical conditions (specify)",
-                    "placeholder-otherMedical": "e.g., Parkinson's, thyroid...",
-                    "label-sleepApnea": "Sleep Apnea",
-                    "label-gerd": "GERD / Acid reflux",
-                    "symptoms-title": "Current Symptoms",
-                    "label-chestPain": "Chest pain / discomfort",
-                    "label-palpitations": "Palpitations",
-                    "label-dyspnea": "Shortness of breath",
-                    "label-syncope": "Syncope / near‑syncope",
-                    "label-fatigue": "Fatigue / exercise intolerance",
-                    "label-noSymptoms": "None of the above",
-                    "meds-title": "Medications & Allergies",
-                    "label-medications": "Current medications (include OTC and herbals)",
-                    "placeholder-medications": "List names and doses...",
-                    "label-allergies": "Allergies (drug, food, latex, etc.)",
-                    "placeholder-allergies": "e.g., penicillin, latex...",
-                    "additional-title": "Additional Information",
-                    "label-smoking": "Smoking status",
-                    "smoking-never": "Never",
-                    "smoking-former": "Former",
-                    "smoking-current": "Current",
-                    "label-alcohol": "Alcohol use",
-                    "alcohol-none": "None",
-                    "alcohol-moderate": "Moderate",
-                    "alcohol-heavy": "Heavy",
-                    "label-surgicalHistory": "Surgical history (previous surgeries)",
-                    "placeholder-surgicalHistory": "List with dates...",
-                    "label-dental": "Dental issues (chipped, loose, dentures, etc.)",
-                    "placeholder-dental": "e.g., loose teeth, crowns",
-                    "vitals-title": "Vital Signs (optional)",
-                    "label-bpSystolic": "Systolic BP (mmHg)",
-                    "placeholder-bpSystolic": "Systolic",
-                    "label-bpDiastolic": "Diastolic BP (mmHg)",
-                    "placeholder-bpDiastolic": "Diastolic",
-                    "label-heartRate": "Heart Rate (bpm)",
-                    "placeholder-heartRate": "Heart rate",
-                    "label-respRate": "Respiratory Rate",
-                    "placeholder-respRate": "Resp rate",
-                    "label-spo2": "SpO₂ (%)",
-                    "placeholder-spo2": "SpO₂",
-                    "label-temperature": "Temperature (°C)",
-                    "placeholder-temperature": "Temp",
-                    "consent-text": "I agree to fill this form voluntarily and without any obligations, and I release the anesthesia team from any future legal liability related to the information provided.",
-                    "rec-title": "Real‑Time Recommendations",
-                    "rec-note": "Based on the information entered, recommendations appear above.",
-                    "recCardio": "Cardiology consult",
-                    "recNeuro": "Neurology consult",
-                    "recEcho": "Echocardiography",
-                    "recEcg": "ECG",
-                    "recCarotid": "Carotid Doppler",
-                    "recLabs": "Laboratory tests",
-                    "recHaematology": "Haematology consult",
-                    "recNephrology": "Nephrology consult",
-                    "recPulmonary": "Pulmonary consult",
-                    "submit-btn": "Save to Google Sheet",
-                    "status-submitting": "Submitting...",
-                    "error-age": "❌ Age is required.",
-                    "error-name": "❌ Full name is required.",
-                    "success": "✅ Data saved successfully!",
-                    "error": "❌ Error saving data."
-                }
-                // For brevity, we include only Arabic and English here.
-                // In a real implementation, you would add the other six languages similarly.
-                // We'll clone English as placeholder for others.
-            };
-
-            // Clone English for missing languages (simplified for this example)
-            const otherLangs = ['ur', 'hi', 'bn', 'ne', 'fr', 'es'];
-            otherLangs.forEach(lang => {
-                translations[lang] = JSON.parse(JSON.stringify(translations.en));
-            });
-
-            // ==================== DOM elements ====================
-            const form = document.getElementById('screeningForm');
-            const langSelect = document.getElementById('langSelect');
-            const body = document.body;
-
-            const age = document.getElementById('age');
-            const hypertension = document.getElementById('hypertension');
-            const diabetes = document.getElementById('diabetes');
-            const cad = document.getElementById('cad');
-            const heartFailure = document.getElementById('heartFailure');
-            const atrialFib = document.getElementById('atrialFib');
-            const stroke = document.getElementById('stroke');
-            const copd = document.getElementById('copd');
-            const ckd = document.getElementById('ckd');
-            const liverDisease = document.getElementById('liverDisease');
-            const bleedingDisorder = document.getElementById('bleedingDisorder');
-            const murmur = document.getElementById('murmur');
-            const carotidBruit = document.getElementById('carotidBruit');
-            const anticoagulants = document.getElementById('anticoagulants');
-            const chestPain = document.getElementById('chestPain');
-            const palpitations = document.getElementById('palpitations');
-            const dyspnea = document.getElementById('dyspnea');
-            const syncope = document.getElementById('syncope');
-            const fatigue = document.getElementById('fatigue');
-            const noSymptoms = document.getElementById('noSymptoms');
-            const bpSystolic = document.getElementById('bpSystolic');
-            const smoking = document.getElementById('smoking');
-            const sleepApnea = document.getElementById('sleepApnea');
-
-            const recCardio = document.getElementById('recCardio');
-            const recNeuro = document.getElementById('recNeuro');
-            const recEcho = document.getElementById('recEcho');
-            const recEcg = document.getElementById('recEcg');
-            const recCarotid = document.getElementById('recCarotid');
-            const recLabs = document.getElementById('recLabs');
-            const recHaematology = document.getElementById('recHaematology');
-            const recNephrology = document.getElementById('recNephrology');
-            const recPulmonary = document.getElementById('recPulmonary');
-            const recBox = document.getElementById('recBox');
-
-            const statusMsg = document.getElementById('statusMessage');
-            const consentCheck = document.getElementById('consentCheck');
-
-            function isChecked(el) { return el ? el.checked : false; }
-
-            // ==================== Real‑time recommendation update ====================
-            function updateRecommendations() {
-                const ageVal = parseInt(age.value) || 0;
-                let cardio = false, neuro = false, echo = false, ecg = false, carotid = false, labs = false,
-                    haematology = false, nephrology = false, pulmonary = false;
-
-                // Cardiology
-                if (ageVal > 70 ||
-                    isChecked(cad) || isChecked(heartFailure) || isChecked(atrialFib) ||
-                    isChecked(hypertension) || (parseInt(bpSystolic.value) > 160) ||
-                    isChecked(chestPain) || isChecked(palpitations) || isChecked(dyspnea) || isChecked(syncope) ||
-                    isChecked(murmur)) {
-                    cardio = true;
-                }
-
-                // Neurology
-                if (isChecked(stroke) || isChecked(carotidBruit)) {
-                    neuro = true;
-                }
-
-                // Echocardiography
-                if (isChecked(heartFailure) || isChecked(atrialFib) || isChecked(murmur) || isChecked(dyspnea)) {
-                    echo = true;
-                }
-
-                // ECG
-                if (ageVal > 65 ||
-                    isChecked(hypertension) || isChecked(diabetes) || isChecked(cad) ||
-                    isChecked(heartFailure) || isChecked(atrialFib) ||
-                    isChecked(palpitations) || isChecked(chestPain) || isChecked(dyspnea)) {
-                    ecg = true;
-                }
-
-                // Carotid Doppler
-                if (isChecked(stroke) || isChecked(carotidBruit) ||
-                    (ageVal > 70 &&
-                     ((isChecked(hypertension) ? 1:0) + (isChecked(diabetes)?1:0) + (smoking.value === 'Current' || smoking.value === 'Former' ?1:0) >= 2))) {
-                    carotid = true;
-                }
-
-                // Laboratory tests
-                if (ageVal > 65 ||
-                    isChecked(diabetes) || isChecked(ckd) || isChecked(liverDisease) ||
-                    isChecked(bleedingDisorder) || isChecked(anticoagulants)) {
-                    labs = true;
-                }
-
-                // Haematology consult (if bleeding disorder or on anticoagulants)
-                if (isChecked(bleedingDisorder) || isChecked(anticoagulants)) {
-                    haematology = true;
-                }
-
-                // Nephrology consult (if CKD)
-                if (isChecked(ckd)) {
-                    nephrology = true;
-                }
-
-                // Pulmonary consult (if sleep apnea or COPD/asthma)
-                if (isChecked(sleepApnea) || isChecked(copd)) {
-                    pulmonary = true;
-                }
-
-                // Hide entire rec panel if none are true
-                const anyTrue = cardio || neuro || echo || ecg || carotid || labs || haematology || nephrology || pulmonary;
-                recBox.style.display = anyTrue ? 'block' : 'none';
-
-                const currentLang = langSelect.value;
-                function setRec(element, condition, key) {
-                    const baseText = translations[currentLang][key] || translations['en'][key];
-                    if (condition) {
-                        element.className = 'rec-yes';
-                        element.innerHTML = '<i class="fas fa-check-circle" style="color:var(--success);"></i> ' + baseText;
-                    } else {
-                        element.className = 'rec-no';
-                        element.innerHTML = '<i class="fas fa-circle" style="color:#adb5bd;"></i> ' + baseText;
-                    }
-                }
-
-                setRec(recCardio, cardio, 'recCardio');
-                setRec(recNeuro, neuro, 'recNeuro');
-                setRec(recEcho, echo, 'recEcho');
-                setRec(recEcg, ecg, 'recEcg');
-                setRec(recCarotid, carotid, 'recCarotid');
-                setRec(recLabs, labs, 'recLabs');
-                setRec(recHaematology, haematology, 'recHaematology');
-                setRec(recNephrology, nephrology, 'recNephrology');
-                setRec(recPulmonary, pulmonary, 'recPulmonary');
-
-                return { cardio, neuro, echo, ecg, carotid, labs, haematology, nephrology, pulmonary };
-            }
-
-            // Attach listeners
-            const inputsToWatch = [
-                age, hypertension, diabetes, cad, heartFailure, atrialFib, stroke,
-                copd, ckd, liverDisease, bleedingDisorder, murmur, carotidBruit,
-                anticoagulants, chestPain, palpitations, dyspnea, syncope, fatigue,
-                noSymptoms, bpSystolic, smoking, sleepApnea
-            ].filter(el => el);
-            inputsToWatch.forEach(el => el.addEventListener('input', updateRecommendations));
-            inputsToWatch.forEach(el => el.addEventListener('change', updateRecommendations));
-            document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', updateRecommendations));
-
-            // ==================== Language switching ====================
-            function applyLanguage(lang) {
-                if (lang === 'ar') {
-                    body.dir = 'rtl';
-                    document.documentElement.lang = 'ar';
-                } else {
-                    body.dir = 'ltr';
-                    document.documentElement.lang = lang;
-                }
-
-                const t = translations[lang] || translations['en'];
-
-                // Update elements by id
-                for (let key in t) {
-                    const element = document.getElementById(key);
-                    if (element) {
-                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.tagName === 'SELECT') {
-                            if (element.placeholder !== undefined && key.startsWith('placeholder-')) {
-                                element.placeholder = t[key];
-                            }
-                        } else {
-                            element.innerText = t[key];
-                        }
-                    }
-                }
-
-                // Update select options manually
-                const optionMappings = [
-                    'sex-option-none', 'sex-option-male', 'sex-option-female',
-                    'smoking-never', 'smoking-former', 'smoking-current',
-                    'alcohol-none', 'alcohol-moderate', 'alcohol-heavy'
-                ];
-                optionMappings.forEach(id => {
-                    const opt = document.getElementById(id);
-                    if (opt) opt.innerText = t[id] || translations['en'][id];
-                });
-
-                document.getElementById('submit-btn').innerHTML = `<i class="fas fa-save"></i> ${t['submit-btn']}`;
-                document.getElementById('rec-title').innerHTML = `<i class="fas fa-lightbulb"></i> ${t['rec-title']}`;
-                document.getElementById('rec-note').innerText = t['rec-note'];
-
-                updateRecommendations();
-            }
-
-            langSelect.addEventListener('change', (e) => applyLanguage(e.target.value));
-            applyLanguage('ar'); // default
-
-            // ==================== Form submission ====================
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                if (!consentCheck.checked) {
-                    alert(translations[langSelect.value]['consent-text'] || 'Please agree to the consent.');
-                    return;
-                }
-
-                statusMsg.innerText = translations[langSelect.value]['status-submitting'] || 'Submitting...';
-
-                if (!age.value || !age.value.trim()) {
-                    statusMsg.innerText = translations[langSelect.value]['error-age'] || '❌ Age is required.';
-                    return;
-                }
-                if (!document.getElementById('fullName').value.trim()) {
-                    statusMsg.innerText = translations[langSelect.value]['error-name'] || '❌ Full name is required.';
-                    return;
-                }
-
-                const rec = updateRecommendations();
-
-                const data = {
-                    name: document.getElementById('fullName').value.trim(),
-                    age: age.value,
-                    sex: document.getElementById('sex').value,
-                    weight: document.getElementById('weight').value,
-                    height: document.getElementById('height').value,
-                    contact: document.getElementById('contact').value,
-                    hypertension: isChecked(hypertension),
-                    diabetes: isChecked(diabetes),
-                    cad: isChecked(cad),
-                    heartFailure: isChecked(heartFailure),
-                    atrialFib: isChecked(atrialFib),
-                    stroke: isChecked(stroke),
-                    copd: isChecked(copd),
-                    ckd: isChecked(ckd),
-                    liverDisease: isChecked(liverDisease),
-                    bleedingDisorder: isChecked(bleedingDisorder),
-                    murmur: isChecked(murmur),
-                    carotidBruit: isChecked(carotidBruit),
-                    anticoagulants: isChecked(anticoagulants),
-                    otherMedical: document.getElementById('otherMedical').value,
-                    sleepApnea: isChecked(sleepApnea),
-                    gerd: isChecked(document.getElementById('gerd')),
-                    chestPain: isChecked(chestPain),
-                    palpitations: isChecked(palpitations),
-                    dyspnea: isChecked(dyspnea),
-                    syncope: isChecked(syncope),
-                    fatigue: isChecked(fatigue),
-                    noSymptoms: isChecked(noSymptoms),
-                    bpSystolic: bpSystolic.value,
-                    bpDiastolic: document.getElementById('bpDiastolic').value,
-                    heartRate: document.getElementById('heartRate').value,
-                    respRate: document.getElementById('respRate').value,
-                    spo2: document.getElementById('spo2').value,
-                    temperature: document.getElementById('temperature').value,
-                    medications: document.getElementById('medications').value,
-                    allergies: document.getElementById('allergies').value,
-                    smoking: smoking.value,
-                    alcohol: document.getElementById('alcohol').value,
-                    surgicalHistory: document.getElementById('surgicalHistory').value,
-                    dental: document.getElementById('dental').value,
-                    cardioConsult: rec.cardio,
-                    neuroConsult: rec.neuro,
-                    echo: rec.echo,
-                    ecg: rec.ecg,
-                    carotidDoppler: rec.carotid,
-                    labTests: rec.labs,
-                    haematologyConsult: rec.haematology,
-                    nephrologyConsult: rec.nephrology,
-                    pulmonaryConsult: rec.pulmonary
-                };
-
-                const scriptURL = 'YOUR_APPS_SCRIPT_WEB_APP_URL'; // <-- REPLACE
-
-                try {
-                    await fetch(scriptURL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({ data: JSON.stringify(data) })
-                    });
-                    statusMsg.innerText = translations[langSelect.value]['success'] || '✅ Data saved successfully!';
-                    form.reset();
-                    updateRecommendations();
-                    consentCheck.checked = false;
-                } catch (error) {
-                    statusMsg.innerText = translations[langSelect.value]['error'] || '❌ Error saving data.';
-                    console.error(error);
-                }
-            });
-
-            // Header scroll effect
-            const header = document.getElementById('main-header');
-            window.onscroll = () => {
-                if (window.scrollY > 50) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
-            };
-
-            updateRecommendations();
-        })();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
