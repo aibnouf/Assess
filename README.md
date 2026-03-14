@@ -1,128 +1,111 @@
-# Pre-Anesthetic Screening Form
+# 🏥 Pre-Anesthetic Screening Form — Improved Edition
 
-A multilingual, static web application for pre‑anesthetic patient screening. Designed for anesthesiologists, it helps collect patient data, provides real‑time recommendations for consultations and investigations, and stores all entries in a Google Sheet. Built with HTML, CSS, and JavaScript – fully client‑side and ready to host on GitHub Pages.
+A multilingual, feature-rich pre-anesthetic screening web application for anesthesia teams.
 
-![Screenshot](screenshot.png) <!-- optional: add a screenshot later -->
+---
 
-## 🌟 Features
+## ✨ New Features & Improvements
 
-- **Multilingual support** – Arabic (simplified for patients), English, Urdu, Hindi, Bengali, Nepali, French, Spanish, and Indonesian.
-- **System‑grouped medical history** – Card format with icons for cardiac, neurological, respiratory, renal, metabolic, and other conditions.
-- **Real‑time recommendations** – Automatically suggests cardiology, neurology, echo, ECG, carotid Doppler, lab tests, haematology, nephrology, and pulmonary consults based on entered data. The panel hides when no recommendations are active.
-- **OCR medication scanner** – Patients can take a photo or upload an image of their medication; a secure serverless function (powered by Gemini 1.5 Flash) extracts the medication name and appends it to the medications field.
-- **Consent checkbox** – Legally informed consent with translated text.
-- **Google Sheets integration** – Each submission appends a row to your Google Sheet (via Apps Script). All fields, including recommendations, are saved.
-- **Mobile‑friendly design** – Clean, responsive layout with a sticky header and language selector.
+### UI/UX
+- 🌙 **Dark Mode** toggle (persisted in localStorage)
+- 📊 **Gradient Progress Bar** – shows form completion percentage in real time
+- ✅ **Section Completion Checkmarks** – each section shows a ✔ when filled
+- 🔝 **Scroll-to-Top button** – appears after scrolling 400 px
+- 🖨️ **Print / PDF button** – clean print stylesheet hides non-essential UI
+- 📏 **BMI Calculator** – auto-calculates and color-codes BMI when weight + height are entered
+- 🩺 **Vital Signs Range Indicator** – color-codes each vital (green/orange/red) with text hint
+- 💾 **Auto-Save to localStorage** – saves every 30 s and on every change; restores on reload
+- 📅 **Assessment Date** field with today's date pre-filled
 
-## 📁 Project Structure
--index.html # Main HTML file (form structure) 
--style.css # All styling (based on provided design) 
--script.js # JavaScript logic (translations, recommendations, OCR, form submission) 
--api/ocr.js # Serverless function for Gemini OCR (Vercel) 
--package.json # Dependencies for the serverless function 
--README.md # This file
+### Medical Content
+- 🏷️ **ASA Physical Status Estimator** – displays estimated ASA I–IV badge in the sidebar
+- 🚫 **NPO Status** (fasting) dropdown
+- ⚠️ **Previous Anesthetic Complications** textarea
+- 🔥 **Family History of Malignant Hyperthermia** checkbox
+- ✅ **"No Symptoms" mutual exclusivity** – selecting "No Symptoms" clears all others and vice versa
+- 💊 **Medications Word Counter** – live word count below the medications textarea
 
+### Code Quality
+- 🐛 **Fixed Urdu RTL** – Urdu (`ur`) now correctly sets `dir="rtl"`
+- 🐛 **Fixed Placeholder Translations** – all `data-i18n-placeholder` attributes now properly translated
+- 🌍 **Bengali & Nepali translations** – all new UI keys added for both languages
+- 🔗 **All 9 languages** fully updated: Arabic, English, Urdu, Hindi, Bengali, Nepali, French, Spanish, Indonesian
+
+---
+
+## 🌐 Supported Languages
+
+| Language | Code | RTL |
+|----------|------|-----|
+| Arabic | `ar` | ✅ |
+| English | `en` | ❌ |
+| Urdu | `ur` | ✅ |
+| Hindi | `hi` | ❌ |
+| Bengali | `bn` | ❌ |
+| Nepali | `ne` | ❌ |
+| French | `fr` | ❌ |
+| Spanish | `es` | ❌ |
+| Indonesian | `id` | ❌ |
+
+---
+
+## 🗂️ Project Structure
+
+```
+/
+├── index.html          ← Main page (RTL Arabic by default)
+├── style.css           ← Styles (dark mode, BMI, vitals, print CSS)
+├── script.js           ← All JS: i18n, BMI, ASA, vitals, auto-save, OCR, submission
+├── api/
+│   └── ocr.js          ← Vercel serverless function (Gemini 1.5 Flash OCR)
+├── package.json
+├── vercel.json
+└── CNAME
+```
+
+---
 
 ## 🚀 Quick Start
 
-1. **Clone or download** this repository.
-2. **Set up a Google Sheet** (see [Google Sheets Setup](#google-sheets-setup)).
-3. **Deploy Google Apps Script** (see [Apps Script Deployment](#apps-script-deployment)).
-4. **Deploy the serverless function** on Vercel (see [Serverless Function Deployment](#serverless-function-deployment)).
-5. **Replace the Apps Script URL** and the OCR endpoint in `script.js`.
-6. **Host the frontend** on GitHub Pages or any static server.
+1. **Clone** this repository
+2. **Setup Google Sheet** → go to https://sheets.new, create a sheet with these columns:
+   ```
+   Timestamp | Name | Age | Sex | Weight | Height | BMI | ASA | Contact | Date | NPO | ...
+   ```
+3. **Deploy Apps Script** → in your Google Sheet, go to Extensions → Apps Script, paste the provided `doPost` handler, and deploy as a Web App
+4. **Replace URL** → in `script.js`, replace `'YOUR_APPS_SCRIPT_WEB_APP_URL'` with your deployed URL
+5. **Set up OCR** → add a `GEMINI_API_KEY` environment variable in Vercel
+6. **Deploy to Vercel** (or GitHub Pages for static-only version)
 
 ---
 
-## 🔧 Google Sheets Setup
+## 🏥 ASA Classification Logic
 
-1. Go to [sheets.new](https://sheets.new) to create a new spreadsheet.
-2. Name it (e.g., “PreAnesthetic Screening”).
-3. In the first row, paste the following headers (in this exact order):
-Name, Age, Sex, Weight, Height, Contact, Hypertension, Diabetes, CAD, HeartFailure, AtrialFib, Stroke, COPD, CKD, LiverDisease, BleedingDisorder, Murmur CarotidBruit, Anticoagulants, OtherMedical, SleepApnea, GERD, ChestPain, 
-Palpitations, Dyspnea, Syncope, Fatigue, NoSymptoms, SystolicBP, DiastolicBP, HeartRate, RespRate, Sp02, Temperature, Medications, Allergies, Smoking, Alcohol, SurgicalHistory, Dental, Timestamp, CardiologyConsult, NeurologyConsult, Echo, ECG, CarotidDoppler, LabTests, HaematologyConsult, NephrologyConsult, PulmonaryConsult
-
-
-
-4. Copy the **Sheet ID** from the URL:  
-   `https://docs.google.com/spreadsheets/d/THIS_IS_THE_ID/edit`
+| ASA | Criteria |
+|-----|---------|
+| I   | No medical conditions |
+| II  | Age ≥ 60, mild HTN, DM, COPD, BMI 30–39, smoking history |
+| III | CAD, HF, AF, stroke, CKD, liver disease, age ≥ 70, BMI ≥ 40 |
+| IV  | HF + dyspnea/syncope, or CAD + chest pain |
 
 ---
 
-## 📜 Apps Script Deployment
+## 📋 Recommendation Logic
 
-1. In your Google Sheet, go to **Extensions → Apps Script**.
-2. Delete any default code and paste the following (replace `YOUR_SHEET_ID` with your actual Sheet ID):
+Real-time recommendations update based on patient input:
 
-```javascript
-function doPost(e) {
-  return handleRequest(e);
-}
+- **Cardiology Consult** – age > 70, CAD, HF, AF, HTN, BP > 160, chest pain, palpitations, dyspnea, syncope, murmur
+- **Neurology Consult** – prior stroke, carotid bruit
+- **Echo** – HF, AF, murmur, dyspnea
+- **ECG** – age > 65, HTN, DM, CAD, HF, AF, palpitations, chest pain, dyspnea
+- **Carotid Doppler** – stroke, carotid bruit, age > 70 with ≥2 risk factors
+- **Lab Tests** – age > 65, DM, CKD, liver disease, bleeding disorder, anticoagulants
+- **Haematology** – bleeding disorder, anticoagulants
+- **Nephrology** – CKD
+- **Pulmonary** – sleep apnea, COPD/asthma
 
-function doGet(e) {
-  return handleRequest(e);
-}
+---
 
-function handleRequest(e) {
-  try {
-    const sheet = SpreadsheetApp.openById('YOUR_SHEET_ID').getActiveSheet();
-    const params = e.parameter;
-    const data = JSON.parse(params.data);
+## 🙏 Credits
 
-    const row = [
-      data.name, data.age, data.sex, data.weight, data.height, data.contact,
-      data.hypertension ? 'Yes' : 'No',
-      data.diabetes ? 'Yes' : 'No',
-      data.cad ? 'Yes' : 'No',
-      data.heartFailure ? 'Yes' : 'No',
-      data.atrialFib ? 'Yes' : 'No',
-      data.stroke ? 'Yes' : 'No',
-      data.copd ? 'Yes' : 'No',
-      data.ckd ? 'Yes' : 'No',
-      data.liverDisease ? 'Yes' : 'No',
-      data.bleedingDisorder ? 'Yes' : 'No',
-      data.murmur ? 'Yes' : 'No',
-      data.carotidBruit ? 'Yes' : 'No',
-      data.anticoagulants ? 'Yes' : 'No',
-      data.otherMedical || '',
-      data.sleepApnea ? 'Yes' : 'No',
-      data.gerd ? 'Yes' : 'No',
-      data.chestPain ? 'Yes' : 'No',
-      data.palpitations ? 'Yes' : 'No',
-      data.dyspnea ? 'Yes' : 'No',
-      data.syncope ? 'Yes' : 'No',
-      data.fatigue ? 'Yes' : 'No',
-      data.noSymptoms ? 'Yes' : 'No',
-      data.bpSystolic || '',
-      data.bpDiastolic || '',
-      data.heartRate || '',
-      data.respRate || '',
-      data.spo2 || '',
-      data.temperature || '',
-      data.medications || '',
-      data.allergies || '',
-      data.smoking || '',
-      data.alcohol || '',
-      data.surgicalHistory || '',
-      data.dental || '',
-      new Date(),
-      data.cardioConsult ? 'Yes' : 'No',
-      data.neuroConsult ? 'Yes' : 'No',
-      data.echo ? 'Yes' : 'No',
-      data.ecg ? 'Yes' : 'No',
-      data.carotidDoppler ? 'Yes' : 'No',
-      data.labTests ? 'Yes' : 'No',
-      data.haematologyConsult ? 'Yes' : 'No',
-      data.nephrologyConsult ? 'Yes' : 'No',
-      data.pulmonaryConsult ? 'Yes' : 'No'
-    ];
-
-    sheet.appendRow(row);
-
-    return ContentService.createTextOutput(JSON.stringify({ success: true }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+Built by the **Anesthesia Team** — empowering safer perioperative care.
