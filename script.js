@@ -100,9 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ الاسم مطلوب.",
             "success": "✅ تم حفظ البيانات بنجاح!",
             "error": "❌ حدث خطأ في الحفظ.",
-            "ocr_processing": "جاري التعرف على النص...",
-            "ocr_success": "تمت إضافة النص المستخرج!",
-            "ocr_failed": "لم نتمكن من قراءة النص، حاول مرة أخرى."
+            "ocr_processing": "جاري التعرف على الدواء...",
+            "ocr_success": "تمت إضافة اسم الدواء!",
+            "ocr_failed": "لم نتمكن من التعرف على الدواء، حاول مرة أخرى."
         },
         en: {
             "lang-label": "🌐 Language",
@@ -203,9 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ Name is required.",
             "success": "✅ Data saved successfully!",
             "error": "❌ Error saving data.",
-            "ocr_processing": "Processing text...",
-            "ocr_success": "Text added!",
-            "ocr_failed": "Could not read text, try again."
+            "ocr_processing": "Processing medication...",
+            "ocr_success": "Medication name added!",
+            "ocr_failed": "Could not identify medication. Try again."
         },
         ur: {
             "lang-label": "🌐 زبان",
@@ -306,9 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ نام درکار ہے۔",
             "success": "✅ ڈیٹا کامیابی سے محفوظ ہو گیا!",
             "error": "❌ ڈیٹا محفوظ کرنے میں خرابی۔",
-            "ocr_processing": "متن پڑھا جا رہا ہے...",
-            "ocr_success": "متن شامل کر دیا گیا!",
-            "ocr_failed": "متن نہیں پڑھا جا سکا، دوبارہ کوشش کریں۔"
+            "ocr_processing": "دوا کی شناخت ہو رہی ہے...",
+            "ocr_success": "دوا کا نام شامل کر دیا گیا!",
+            "ocr_failed": "دوا کی شناخت نہیں ہو سکی، دوبارہ کوشش کریں۔"
         },
         hi: {
             "lang-label": "🌐 भाषा",
@@ -409,9 +409,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ नाम आवश्यक है।",
             "success": "✅ डेटा सफलतापूर्वक सहेजा गया!",
             "error": "❌ डेटा सहेजने में त्रुटि।",
-            "ocr_processing": "पाठ संसाधित किया जा रहा है...",
-            "ocr_success": "पाठ जोड़ दिया गया!",
-            "ocr_failed": "पाठ नहीं पढ़ा जा सका, फिर से प्रयास करें।"
+            "ocr_processing": "दवा पहचानी जा रही है...",
+            "ocr_success": "दवा का नाम जोड़ दिया गया!",
+            "ocr_failed": "दवा की पहचान नहीं हो सकी, फिर से प्रयास करें।"
         },
         bn: {
             "lang-label": "🌐 ভাষা",
@@ -512,9 +512,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ নাম প্রয়োজন।",
             "success": "✅ তথ্য সফলভাবে সংরক্ষিত!",
             "error": "❌ তথ্য সংরক্ষণে ত্রুটি।",
-            "ocr_processing": "পাঠ্য প্রক্রিয়া করা হচ্ছে...",
-            "ocr_success": "পাঠ্য যুক্ত হয়েছে!",
-            "ocr_failed": "পাঠ্য পড়া যায়নি, আবার চেষ্টা করুন।"
+            "ocr_processing": "ওষুধ শনাক্ত করা হচ্ছে...",
+            "ocr_success": "ওষুধের নাম যোগ করা হয়েছে!",
+            "ocr_failed": "ওষুধ শনাক্ত করা যায়নি, আবার চেষ্টা করুন।"
         },
         ne: {
             "lang-label": "🌐 भाषा",
@@ -615,9 +615,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ नाम आवश्यक छ।",
             "success": "✅ डाटा सफलतापूर्वक सुरक्षित!",
             "error": "❌ डाटा सुरक्षित गर्न त्रुटि।",
-            "ocr_processing": "पाठ प्रक्रिया हुँदै...",
-            "ocr_success": "पाठ थपियो!",
-            "ocr_failed": "पाठ पढ्न सकिएन, फेरि प्रयास गर्नुहोस्।"
+            "ocr_processing": "औषधि पहिचान हुँदै...",
+            "ocr_success": "औषधिको नाम थपियो!",
+            "ocr_failed": "औषधि पहिचान हुन सकेन, फेरि प्रयास गर्नुहोस्।"
         },
         fr: {
             "lang-label": "🌐 Langue",
@@ -718,9 +718,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ Le nom est requis.",
             "success": "✅ Données enregistrées avec succès !",
             "error": "❌ Erreur lors de l'enregistrement.",
-            "ocr_processing": "Traitement du texte...",
-            "ocr_success": "Texte ajouté !",
-            "ocr_failed": "Impossible de lire le texte, réessayez."
+            "ocr_processing": "Identification du médicament...",
+            "ocr_success": "Nom du médicament ajouté !",
+            "ocr_failed": "Impossible d'identifier le médicament, réessayez."
         },
         es: {
             "lang-label": "🌐 Idioma",
@@ -821,9 +821,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ El nombre es obligatorio.",
             "success": "✅ ¡Datos guardados correctamente!",
             "error": "❌ Error al guardar los datos.",
-            "ocr_processing": "Procesando texto...",
-            "ocr_success": "¡Texto añadido!",
-            "ocr_failed": "No se pudo leer el texto, intente de nuevo."
+            "ocr_processing": "Identificando medicamento...",
+            "ocr_success": "¡Nombre del medicamento añadido!",
+            "ocr_failed": "No se pudo identificar el medicamento, intente de nuevo."
         },
         id: {
             "lang-label": "🌐 Bahasa",
@@ -924,9 +924,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "error-name": "❌ Nama harus diisi.",
             "success": "✅ Data berhasil disimpan!",
             "error": "❌ Gagal menyimpan data.",
-            "ocr_processing": "Memproses teks...",
-            "ocr_success": "Teks berhasil ditambahkan!",
-            "ocr_failed": "Tidak dapat membaca teks, coba lagi."
+            "ocr_processing": "Memproses obat...",
+            "ocr_success": "Nama obat ditambahkan!",
+            "ocr_failed": "Tidak dapat mengidentifikasi obat, coba lagi."
         }
     };
 
@@ -1129,38 +1129,43 @@ document.addEventListener('DOMContentLoaded', () => {
     langSelect.addEventListener('change', (e) => applyLanguage(e.target.value));
     applyLanguage('ar'); // default
 
-    // ==================== OCR Function ====================
+    // ==================== OCR with Gemini (via serverless function) ====================
     async function performOCR(imageFile) {
         ocrStatus.innerText = translations[langSelect.value]['ocr_processing'] || 'Processing...';
+        ocrStatus.style.color = 'var(--primary)';
+
+        const formData = new FormData();
+        formData.append('image', imageFile);
+
         try {
-            const { data: { text } } = await Tesseract.recognize(
-                imageFile,
-                'ara+eng', // recognize Arabic + English (medications may be in either)
-                {
-                    logger: m => console.log(m) // optional progress
-                }
-            );
-            // Clean up text (remove excessive line breaks)
-            const cleanText = text.replace(/\s+/g, ' ').trim();
-            if (cleanText.length > 0) {
-                // Append to medications textarea
+            // If deployed on Vercel, the function is at /api/ocr
+            // For local testing, you may need to use full URL like http://localhost:3000/api/ocr
+            const response = await fetch('/api/ocr', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.medicationName) {
                 const current = medsTextarea.value;
-                medsTextarea.value = current + (current ? '\n' : '') + cleanText;
-                ocrStatus.innerText = translations[langSelect.value]['ocr_success'] || 'Text added!';
+                medsTextarea.value = current + (current ? '\n' : '') + data.medicationName;
+                ocrStatus.innerText = translations[langSelect.value]['ocr_success'] || 'Medication name added!';
                 ocrStatus.style.color = 'green';
             } else {
-                ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'No text found.';
+                ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Could not identify medication.';
                 ocrStatus.style.color = 'red';
             }
         } catch (error) {
             console.error('OCR error:', error);
-            ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'OCR failed.';
+            ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Error processing image.';
             ocrStatus.style.color = 'red';
         }
+
         setTimeout(() => {
             ocrStatus.innerText = '';
             ocrStatus.style.color = 'var(--primary)';
-        }, 3000);
+        }, 4000);
     }
 
     scanBtn.addEventListener('click', () => {
