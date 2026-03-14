@@ -1,0 +1,8 @@
+{
+  "name": "preanesthetic-screening",
+  "version": "1.0.0",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "formidable": "^3.5.1"
+  }
+}
