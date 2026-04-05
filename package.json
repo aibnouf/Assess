@@ -1,18 +1,19 @@
 {
   "name": "preanesthetic-screening",
   "version": "1.0.0",
-  "description": "Pre-anesthetic screening form with OCR",
+  "description": "Multilingual pre‑anesthetic screening with OCR",
+  "type": "module",
   "main": "index.html",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel deploy --prod"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.1.3",
-    "formidable": "^3.5.1"
+    "@google/generative-ai": "^0.21.0",
+    "formidable": "^3.5.2"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "license": "MIT"
 }
