@@ -1,13 +1,13 @@
 {
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "functions": {
     "api/ocr.js": {
-      "maxDuration": 10
+      "runtime": "nodejs18.x"
     }
   }
-  {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
-  "functions": {
-    "api/ocr.js": { "runtime": "nodejs18.x" }
-  }
-}
 }
