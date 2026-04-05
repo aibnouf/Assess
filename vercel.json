@@ -4,4 +4,10 @@
       "maxDuration": 10
     }
   }
+  {
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "functions": {
+    "api/ocr.js": { "runtime": "nodejs18.x" }
+  }
+}
 }
