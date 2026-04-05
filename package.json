@@ -1,8 +1,16 @@
 {
   "name": "preanesthetic-screening",
   "version": "1.0.0",
+  "description": "Multilingual pre‑anesthetic screening form with OCR medication recognition",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel deploy --prod"
+  },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
+    "@google/generative-ai": "^0.1.3",
     "formidable": "^3.5.1"
-  }
+  },
+  "author": "Anesthesia Team",
+  "license": "MIT"
 }
