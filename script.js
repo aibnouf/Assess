@@ -1529,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pulmonaryConsult: rec.pulmonary
         };
 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbzkaKvBsy1keK-zjNzMratvW_beIS_YbdtYjqzmW8Sg4MUSu06TASnMWaTSlhWwfOBi/exec'; // <-- REPLACE
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbws6pHyy2ZC9oJuJXpDBiAyeARxRPYtdf_ff6Wow0n_NiKE4vr5npD9BghtVy6acMdX/exec'; // <-- REPLACE
 
         try {
             await fetch(scriptURL, {
