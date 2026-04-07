@@ -21,13 +21,17 @@
         th { background: #34495e; color: white; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; }
         .admin-section { margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px; }
-        .delete-btn { background: #c0392b; margin-left: 5px; }
+        .approve-btn { background: #27ae60; margin-left: 5px; }
+        .reject-btn { background: #c0392b; margin-left: 5px; }
         .logout-btn { background: #e67e22; }
         .request-btn { background: #3498db; margin-top: 10px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         .modal-content { background: white; max-width: 400px; margin: 100px auto; padding: 20px; border-radius: 16px; }
         .modal-content input { width: 100%; margin: 8px 0; }
         .modal-content button { margin-top: 10px; }
+        .status-pending { color: #f39c12; font-weight: bold; }
+        .status-approved { color: #27ae60; font-weight: bold; }
+        .status-rejected { color: #c0392b; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -76,20 +80,19 @@
                 <tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th>
             </thead>
             <tbody></tbody>
-         </table>
+          </table>
     </div>
+    
+    <!-- ADMIN PANEL (visible only to admin) -->
     <div id="admin-panel" class="admin-section" style="display:none;">
-        <h3>Admin Panel – Manage Doctors</h3>
-        <form id="add-doctor-form">
-            <input type="email" id="new-email" placeholder="Doctor Email" required>
-            <input type="text" id="new-name" placeholder="Full Name" required>
-            <button type="submit">Add Doctor</button>
-        </form>
+        <h3>Admin Panel – Manage Doctor Access</h3>
         <table id="doctors-table">
-            <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
+            <thead>
+                <tr><th>Email</th><th>Name</th><th>Status</th><th>Admin</th><th>Actions</th></tr>
+            </thead>
             <tbody></tbody>
         </table>
-        <p><small>Note: New doctor must first exist in Supabase Auth. Use same email here.</small></p>
+        <p><small>Pending doctors can be approved or rejected. Approved doctors must also exist in Auth (created automatically on sign‑up).</small></p>
     </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -98,7 +101,7 @@
     // ==================== SUPABASE CONFIGURATION ====================
     // REPLACE WITH YOUR ACTUAL SUPABASE URL AND ANON KEY
     const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyemJ4dWVmZHljeGFlb2lia21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg2ODMsImV4cCI6MjA5MTA4NDY4M30.f2LV6LbClEXzrGK5Pl0Qt6QPfNegjjqpIjRVokhxnl0'; // CHANGE THIS
+    const SUPABASE_ANON_KEY = 'your-anon-key-here'; // CHANGE THIS
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
@@ -115,18 +118,19 @@
         return data.user;
     }
     
-    async function loadDoctorProfile(userId) {
+    async function loadDoctorProfile(email) {
         const { data, error } = await supabase
             .from('doctors')
             .select('*')
-            .eq('id', userId)
+            .eq('email', email)
             .single();
         if (error) throw error;
+        if (data.status !== 'approved') throw new Error('Your account is not approved yet.');
         currentDoctor = data;
         document.getElementById('doctor-name').innerText = data.full_name;
         if (data.is_admin) {
             document.getElementById('admin-panel').style.display = 'block';
-            loadDoctors();
+            loadAllDoctors();
         }
         return data;
     }
@@ -227,8 +231,8 @@
     }
     
     // ==================== ADMIN FUNCTIONS ====================
-    async function loadDoctors() {
-        const { data, error } = await supabase.from('doctors').select('*');
+    async function loadAllDoctors() {
+        const { data, error } = await supabase.from('doctors').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         const tbody = document.querySelector('#doctors-table tbody');
         tbody.innerHTML = '';
@@ -236,42 +240,46 @@
             const row = tbody.insertRow();
             row.insertCell(0).innerText = doc.email;
             row.insertCell(1).innerText = doc.full_name;
-            row.insertCell(2).innerText = doc.is_admin ? 'Yes' : 'No';
-            const actions = row.insertCell(3);
-            if (!doc.is_admin) {
-                const delBtn = document.createElement('button');
-                delBtn.innerText = 'Delete';
-                delBtn.className = 'delete-btn';
-                delBtn.onclick = () => deleteDoctor(doc.id);
-                actions.appendChild(delBtn);
+            const statusSpan = document.createElement('span');
+            statusSpan.innerText = doc.status;
+            statusSpan.className = `status-${doc.status}`;
+            row.insertCell(2).appendChild(statusSpan);
+            row.insertCell(3).innerText = doc.is_admin ? 'Yes' : 'No';
+            const actions = row.insertCell(4);
+            if (doc.status === 'pending') {
+                const approveBtn = document.createElement('button');
+                approveBtn.innerText = 'Approve';
+                approveBtn.className = 'approve-btn';
+                approveBtn.onclick = () => updateDoctorStatus(doc.id, 'approved');
+                actions.appendChild(approveBtn);
+                
+                const rejectBtn = document.createElement('button');
+                rejectBtn.innerText = 'Reject';
+                rejectBtn.className = 'reject-btn';
+                rejectBtn.onclick = () => updateDoctorStatus(doc.id, 'rejected');
+                actions.appendChild(rejectBtn);
+            } else if (doc.status === 'approved' && !doc.is_admin && doc.email !== currentDoctor.email) {
+                const rejectBtn = document.createElement('button');
+                rejectBtn.innerText = 'Revoke';
+                rejectBtn.className = 'reject-btn';
+                rejectBtn.onclick = () => updateDoctorStatus(doc.id, 'rejected');
+                actions.appendChild(rejectBtn);
             }
         });
     }
     
-    async function deleteDoctor(doctorId) {
-        if (!confirm('Delete this doctor?')) return;
-        const { error } = await supabase.from('doctors').delete().eq('id', doctorId);
-        if (error) alert(error.message);
-        else loadDoctors();
-    }
-    
-    async function addDoctor(email, fullName) {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail?.(email);
-        if (userError || !userData) {
-            alert('User not found in Auth. Please create the user first in Supabase Auth → Users → Add User.');
-            return;
-        }
-        const userId = userData.user.id;
+    async function updateDoctorStatus(doctorId, newStatus) {
         const { error } = await supabase
             .from('doctors')
-            .insert([{ id: userId, email, full_name: fullName, is_admin: false }]);
-        if (error) alert(error.message);
-        else loadDoctors();
+            .update({ status: newStatus })
+            .eq('id', doctorId);
+        if (error) alert('Error: ' + error.message);
+        else loadAllDoctors();
     }
     
     // ==================== SIGNUP (REQUEST ACCESS) ====================
     async function requestDoctorAccess(fullName, email, password) {
-        // 1. Create user in auth
+        // 1. Create user in auth (required for login later)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -279,11 +287,16 @@
         });
         if (signUpError) throw signUpError;
         
-        // 2. Insert into doctor_requests table
-        const { error: requestError } = await supabase
-            .from('doctor_requests')
-            .insert([{ email: email, full_name: fullName, status: 'pending' }]);
-        if (requestError) throw requestError;
+        // 2. Insert into doctors table with status 'pending'
+        const { error: insertError } = await supabase
+            .from('doctors')
+            .insert([{ 
+                email: email, 
+                full_name: fullName, 
+                status: 'pending',
+                is_admin: false 
+            }]);
+        if (insertError) throw insertError;
         
         return true;
     }
@@ -295,7 +308,7 @@
         const password = document.getElementById('password').value;
         try {
             const user = await login(email, password);
-            await loadDoctorProfile(user.id);
+            await loadDoctorProfile(email);
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('dashboard-container').style.display = 'block';
             await fetchAssessments('today');
@@ -311,16 +324,6 @@
     document.getElementById('exportPdfBtn').onclick = exportToPDF;
     document.getElementById('exportExcelBtn').onclick = exportToExcel;
     document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
-    
-    // Admin add doctor
-    if (document.getElementById('add-doctor-form')) {
-        document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('new-email').value;
-            const name = document.getElementById('new-name').value;
-            await addDoctor(email, name);
-        });
-    }
     
     // Signup modal logic
     const modal = document.getElementById('signupModal');
