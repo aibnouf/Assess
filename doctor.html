@@ -10,14 +10,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; }
-        .login-form { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 16px; }
+        .login-form { max-width: 400px; margin: 50px auto; }
         input, button { padding: 10px; margin: 8px 0; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
         button { background: #2c6e9e; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #1b4f72; }
         .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
@@ -29,7 +26,7 @@
     </style>
 </head>
 <body>
-<div id="login-container" class="container" style="max-width: 400px;">
+<div id="login-container" class="container login-form">
     <h2>Doctor Login</h2>
     <form id="login-form">
         <input type="email" id="email" placeholder="Email" required>
@@ -56,8 +53,6 @@
             <tbody></tbody>
         </table>
     </div>
-
-    <!-- Admin panel (only visible to admin users) -->
     <div id="admin-panel" class="admin-section" style="display:none;">
         <h3>Admin Panel – Manage Doctors</h3>
         <form id="add-doctor-form">
@@ -74,10 +69,8 @@
 </div>
 <div id="toast" class="toast"></div>
 
-<script>
-    // Supabase client (must match your keys)
-    const SUPABASE_URL = 'https://your-project.supabase.co';   // CHANGE
-    const SUPABASE_ANON_KEY = 'your-anon-key';                 // CHANGE
+<script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentDoctor = null;
@@ -130,7 +123,7 @@
         const tbody = document.querySelector('#assessments-table tbody');
         tbody.innerHTML = '';
         if (!data.length) {
-            tbody.innerHTML = '<tr><td colspan="8">No assessments found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8">No assessments found.</tr><tr>';
             return;
         }
         data.forEach(patient => {
@@ -195,7 +188,7 @@
                 schema: 'public',
                 table: 'assessments'
             }, (payload) => {
-                showNotification(`🔔 New assessment from ${payload.new.name} (${payload.new.file_number || 'No file'})`);
+                showNotification(`🔔 New assessment from ${payload.new.name}`);
                 fetchAssessments(currentFilter);
             })
             .subscribe();
@@ -231,7 +224,6 @@
     }
 
     async function addDoctor(email, fullName) {
-        // First check if user exists in auth (we need the ID)
         const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail?.(email);
         if (userError || !userData) {
             alert('User not found in Auth. Please create the user first in Supabase Auth → Users → Add User.');
