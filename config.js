@@ -1,3 +1,3 @@
-// config.js - Supabase credentials (change these once)
-const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyemJ4dWVmZHljeGFlb2lia21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg2ODMsImV4cCI6MjA5MTA4NDY4M30.f2LV6LbClEXzrGK5Pl0Qt6QPfNegjjqpIjRVokhxnl0';
+// config.js
+export const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyemJ4dWVmZHljeGFlb2lia21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg2ODMsImV4cCI6MjA5MTA4NDY4M30.f2LV6LbClEXzrGK5Pl0Qt6QPfNegjjqpIjRVokhxnl0';
