@@ -942,6 +942,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Initialize Supabase client
+const SUPABASE_URL = 'https://yourproject.supabase.co';
+const SUPABASE_ANON_KEY = 'your-anon-key';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Helper to check if user is logged in
+async function getCurrentUser() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error) return null;
+  return user;
+}
+
+// Helper to get doctor record (including clinic_id, is_admin)
+async function getCurrentDoctor() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from('doctors')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+  if (error) return null;
+  return data;
+}
     // Merge newKeys into existing translations
     for (const lang in newKeys) {
         if (translations[lang]) Object.assign(translations[lang], newKeys[lang]);
