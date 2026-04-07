@@ -53,14 +53,13 @@ A multilingual, feature-rich pre-anesthetic screening web application for anesth
 
 ```
 /
-├── index.html          ← Main page (RTL Arabic by default)
-├── style.css           ← Styles (dark mode, BMI, vitals, print CSS)
-├── script.js           ← All JS: i18n, BMI, ASA, vitals, auto-save, OCR, submission
-├── api/
-│   └── ocr.js          ← Vercel serverless function (Gemini 1.5 Flash OCR)
-├── package.json
-├── vercel.json
-└── CNAME
+├── index.html               # Patient form (multilingual, with clinic dropdown)
+├── doctorspage.html         # Doctor dashboard (login, real‑time table, PDF export)
+├── admin.html               # Admin panel (manage doctors, view all data)
+├── style.css                # Shared styles (your existing CSS)
+├── script.js                # Shared JS (Supabase client, helpers)
+├── assets/                  # (optional) images, fonts
+└── README.md
 ```
 
 ---
