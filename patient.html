@@ -10,6 +10,7 @@
     <script type="module" src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@supabase/functions-js@latest/dist/umd/index.js"></script>
+    <script type="module"> import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js'; const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</script>
 </head>
 <body>
     <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
