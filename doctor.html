@@ -70,7 +70,9 @@
 <div id="toast" class="toast"></div>
 
 <script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+    const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyemJ4dWVmZHljeGFlb2lia21jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg2ODMsImV4cCI6MjA5MTA4NDY4M30.f2LV6LbClEXzrGK5Pl0Qt6QPfNegjjqpIjRVokhxnl0';
+    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentDoctor = null;
