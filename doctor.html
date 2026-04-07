@@ -6,6 +6,7 @@
     <title>Doctor Dashboard | Pre‑Anesthetic</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module"> import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js'; const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -99,9 +100,8 @@
 
 <script type="module">
     // ==================== SUPABASE CONFIGURATION ====================
-    // REPLACE WITH YOUR ACTUAL SUPABASE URL AND ANON KEY
-    const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
-    const SUPABASE_ANON_KEY = 'your-anon-key-here'; // CHANGE THIS
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
