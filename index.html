@@ -1,146 +1,82 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التقييم قبل التخدير | Pre‑Anesthetic Screening</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Pre‑Anesthetic | Patient or Doctor</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+        .choice-container {
+            background: white;
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-patient {
+            background: #3498db;
+            color: white;
+            box-shadow: 0 4px 10px rgba(52,152,219,0.3);
+        }
+        .btn-doctor {
+            background: #2ecc71;
+            color: white;
+            box-shadow: 0 4px 10px rgba(46,204,113,0.3);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+    </style>
 </head>
 <body>
-    <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-    <header id="main-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="header-main">
-                    <h1><i class="fas fa-stethoscope"></i> <span id="header-title">التقييم قبل التخدير</span></h1>
-                    <p class="tagline" id="header-tagline">نموذج مبسط لتقييم حالتك قبل العملية</p>
-                </div>
-                <div class="header-controls">
-                    <button type="button" id="darkModeToggle" class="icon-btn"><i class="fas fa-moon"></i></button>
-                    <div class="lang-selector">
-                        <label for="langSelect" id="lang-label">🌐 اللغة</label>
-                        <select id="langSelect">
-                            <option value="ar">العربية</option><option value="en">English</option><option value="ur">اردو</option>
-                            <option value="hi">हिन्दी</option><option value="bn">বাংলা</option><option value="ne">नेपाली</option>
-                            <option value="fr">Français</option><option value="es">Español</option><option value="id">Bahasa Indonesia</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="container">
-        <div class="main-grid">
-            <div class="form-panel">
-                <form id="screeningForm">
-                    <!-- Demographics Section (with shift dropdown) -->
-                    <div class="section" id="section-demographics">
-                        <h2 class="section-title"><i class="fas fa-user"></i> <span id="demographics-title">بياناتك</span><span class="section-done" id="done-demographics"></span></h2>
-                        <div class="form-row">
-                            <div class="form-group"><label for="fullName" id="label-fullName">الاسم الكامل *</label><input type="text" id="fullName" required></div>
-                            <div class="form-group"><label for="age" id="label-age">العمر *</label><input type="number" id="age" required></div>
-                            <div class="form-group"><label for="sex" id="label-sex">الجنس</label><select id="sex"><option value="">-- اختر --</option><option value="Male">ذكر</option><option value="Female">أنثى</option></select></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label for="weight" id="label-weight">الوزن (كغ)</label><input type="number" id="weight" step="0.1"></div>
-                            <div class="form-group"><label for="height" id="label-height">الطول (سم)</label><input type="number" id="height" step="0.1"></div>
-                            <div class="form-group"><label for="contact" id="label-contact">رقم الهاتف</label><input type="tel" id="contact"></div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label for="fileNumber" id="label-fileNumber">رقم الملف</label><input type="text" id="fileNumber"></div>
-                            <div class="form-group"><label for="assessmentDate" id="label-assessmentDate">تاريخ التقييم</label><input type="date" id="assessmentDate"></div>
-                            <div class="form-group"><label for="shift" id="label-shift">الفترة / Shift</label><select id="shift" required><option value="Morning">صباحي / Morning</option><option value="Evening">مسائي / Evening</option></select></div>
-                        </div>
-                        <div id="bmiDisplay" class="bmi-display" style="display:none;"><i class="fas fa-weight"></i> <span id="bmi-label-text">BMI</span>: <strong id="bmiValue"></strong> <span class="bmi-badge" id="bmiCategory"></span> <span class="bmi-note" id="bmiNote"></span></div>
-                    </div>
-
-                    <!-- Medical History, Symptoms, Medications, etc. (keep your existing HTML) -->
-                    <!-- For brevity, I'm showing only the critical parts. You must keep all your existing sections. -->
-                    <!-- ... (copy your existing medical history, symptoms, meds, vitals, consent, etc.) ... -->
-
-                    <div class="action-buttons">
-                        <button type="submit" id="submit-btn"><i class="fas fa-save"></i> <span id="submit-btn-text">حفظ</span></button>
-                        <button type="button" id="printBtn" class="secondary-btn"><i class="fas fa-print"></i> <span id="print-btn-text">طباعة</span></button>
-                    </div>
-                    <div id="statusMessage" class="status-message"></div>
-                    <div id="autosave-badge" class="autosave-badge" style="display:none;"><i class="fas fa-cloud-check"></i> <span id="autosave-text">تم الحفظ التلقائي</span></div>
-                </form>
-            </div>
-            <div class="rec-panel"><!-- ASA & recommendations panel (keep your existing) --></div>
-        </div>
-    </main>
-
-    <button id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
-    <footer><div class="container"><p><strong>فريق التخدير</strong> – نحن هنا لمساعدتك</p></div></footer>
-
-    <script>
-        // ==================== SUPABASE SUBMISSION ====================
-        async function submitToSupabase(formData) {
-            const record = {
-                name: formData.fullName, age: formData.age, sex: formData.sex,
-                weight: formData.weight, height: formData.height, bmi: formData.bmi,
-                contact: formData.contact, file_number: formData.fileNumber,
-                assessment_date: formData.assessmentDate, shift: formData.shift,
-                npo_status: formData.npoStatus, asa_class: formData.asaClass,
-                family_mh: formData.familyMH, prev_anesthesia: formData.prevAnesthesia,
-                hypertension: formData.hypertension, cad: formData.cad,
-                heart_failure: formData.heartFailure, atrial_fib: formData.atrialFib,
-                murmur: formData.murmur, stroke: formData.stroke,
-                carotid_bruit: formData.carotidBruit, copd: formData.copd,
-                sleep_apnea: formData.sleepApnea, ckd: formData.ckd,
-                liver_disease: formData.liverDisease, bleeding_disorder: formData.bleedingDisorder,
-                anticoagulants: formData.anticoagulants, diabetes: formData.diabetes,
-                gerd: formData.gerd, other_medical: formData.otherMedical,
-                chest_pain: formData.chestPain, palpitations: formData.palpitations,
-                dyspnea: formData.dyspnea, syncope: formData.syncope, fatigue: formData.fatigue,
-                no_symptoms: formData.noSymptoms, medications: formData.medications,
-                allergies: formData.allergies, smoking: formData.smoking, alcohol: formData.alcohol,
-                surgical_history: formData.surgicalHistory, dental: formData.dental,
-                bp_systolic: formData.bpSystolic, bp_diastolic: formData.bpDiastolic,
-                heart_rate: formData.heartRate, resp_rate: formData.respRate,
-                spo2: formData.spo2, temperature: formData.temperature,
-                cardio_consult: formData.cardioConsult, neuro_consult: formData.neuroConsult,
-                echo: formData.echo, ecg: formData.ecg, carotid_doppler: formData.carotidDoppler,
-                lab_tests: formData.labTests, haematology_consult: formData.haematologyConsult,
-                nephrology_consult: formData.nephrologyConsult, pulmonary_consult: formData.pulmonaryConsult,
-                shift_date: new Date().toISOString().split('T')[0]
-            };
-            const { error } = await supabase.from('assessments').insert([record]);
-            if (error) throw error;
-        }
-
-        // Hook into your existing form submit (modify your current submit handler)
-        document.getElementById('screeningForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            // Collect all form data (as you already do in your existing script)
-            const formData = {
-                fullName: document.getElementById('fullName').value,
-                age: document.getElementById('age').value,
-                sex: document.getElementById('sex').value,
-                weight: document.getElementById('weight').value,
-                height: document.getElementById('height').value,
-                bmi: document.getElementById('bmiValue')?.innerText || '',
-                contact: document.getElementById('contact').value,
-                fileNumber: document.getElementById('fileNumber').value,
-                assessmentDate: document.getElementById('assessmentDate').value,
-                shift: document.getElementById('shift').value,
-                // ... add all other fields (checkboxes, etc.) – same as your current formData object
-            };
-            try {
-                await submitToSupabase(formData);
-                document.getElementById('statusMessage').innerText = '✅ تم الحفظ بنجاح';
-                document.getElementById('screeningForm').reset();
-                document.getElementById('assessmentDate').value = new Date().toISOString().split('T')[0];
-            } catch (err) {
-                console.error(err);
-                document.getElementById('statusMessage').innerText = '❌ فشل الحفظ، حاول مرة أخرى';
-            }
-        });
-    </script>
+<div class="choice-container">
+    <h1>🏥 Pre‑Anesthetic Assessment</h1>
+    <p class="subtitle">Choose your role</p>
+    <div class="buttons">
+        <button class="btn btn-patient" onclick="window.location.href='patient.html'">📝 Patient Form</button>
+        <button class="btn btn-doctor" onclick="window.location.href='doctor.html'">👨‍⚕️ Doctor Login</button>
+    </div>
+    <footer>Secure data storage | Real‑time updates</footer>
+</div>
 </body>
 </html>
