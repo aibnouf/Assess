@@ -1332,33 +1332,55 @@ document.addEventListener('DOMContentLoaded', () => {
     async function performOCR(imageFile) {
         ocrStatus.innerText = translations[langSelect.value]['ocr_processing'] || 'Processing...';
         ocrStatus.style.color = 'var(--primary)';
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        try {
-            const response = await fetch('/api/ocr', { method: 'POST', body: formData });
-            const data = await response.json();
-            if (data.success && data.medicationName) {
-                const current = medsTextarea.value;
-                medsTextarea.value = current + (current ? '\n' : '') + data.medicationName;
-                ocrStatus.innerText = translations[langSelect.value]['ocr_success'] || 'Medication name added!';
-                ocrStatus.style.color = 'green';
-            } else {
-                ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Could not identify medication.';
+
+        // Convert image file to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(imageFile);
+        reader.onload = async () => {
+            const base64 = reader.result.split(',')[1];
+            const mimeType = imageFile.type;
+
+            try {
+                const { data, error } = await supabase.functions.invoke('ocr', {
+                    body: { imageBase64: base64, mimeType }
+                });
+
+                if (error) throw error;
+
+                if (data.success && data.medicationName) {
+                    const current = medsTextarea.value;
+                    medsTextarea.value = current + (current ? '\n' : '') + data.medicationName;
+                    ocrStatus.innerText = translations[langSelect.value]['ocr_success'] || 'Medication name added!';
+                    ocrStatus.style.color = 'green';
+                } else {
+                    ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Could not identify medication.';
+                    ocrStatus.style.color = 'red';
+                }
+            } catch (err) {
+                console.error(err);
+                ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Error processing image.';
                 ocrStatus.style.color = 'red';
+            } finally {
+                setTimeout(() => {
+                    ocrStatus.innerText = '';
+                    ocrStatus.style.color = 'var(--primary)';
+                }, 4000);
             }
-        } catch (error) {
-            ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Error processing image.';
+        };
+        reader.onerror = () => {
+            ocrStatus.innerText = translations[langSelect.value]['ocr_failed'] || 'Failed to read image.';
             ocrStatus.style.color = 'red';
-        }
-        setTimeout(() => { ocrStatus.innerText = ''; ocrStatus.style.color = 'var(--primary)'; }, 4000);
+        };
     }
+
+    // Attach event listeners
     scanBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) performOCR(file);
         fileInput.value = '';
     });
-
+    
     // ==================== SUPABASE SUBMISSION (NO RECOMMENDATIONS) ====================
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
