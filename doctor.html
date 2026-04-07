@@ -8,54 +8,78 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="script.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7fc; margin: 0; padding: 20px; }
-        .login-container, .dashboard-container { max-width: 1300px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
-        th { background: #2c6e9e; color: white; }
-        .filters { margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap; }
-        button { background: #2c6e9e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; }
+        .login-form { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 16px; }
+        input, button { padding: 10px; margin: 8px 0; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+        button { background: #2c6e9e; color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background: #1b4f72; }
-        .logout-btn { background: #c0392b; }
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+        th { background: #34495e; color: white; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; }
-        .view-btn { background: #f39c12; margin-left: 5px; }
+        .admin-section { margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px; }
+        .delete-btn { background: #c0392b; margin-left: 5px; }
+        .logout-btn { background: #e67e22; }
     </style>
 </head>
 <body>
-<div id="login-container" class="login-container">
+<div id="login-container" class="container" style="max-width: 400px;">
     <h2>Doctor Login</h2>
     <form id="login-form">
-        <input type="email" id="email" placeholder="Email" required style="width:100%; padding:10px; margin-bottom:10px;"><br>
-        <input type="password" id="password" placeholder="Password" required style="width:100%; padding:10px; margin-bottom:10px;"><br>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
         <button type="submit">Login</button>
     </form>
 </div>
 
-<div id="dashboard-container" class="dashboard-container" style="display:none;">
+<div id="dashboard-container" class="container" style="display:none;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Welcome, <span id="doctor-name"></span> (<span id="doctor-shift"></span> shift)</h2>
+        <h2>Welcome, <span id="doctor-name"></span></h2>
         <button id="logoutBtn" class="logout-btn">Logout</button>
     </div>
     <div class="filters">
         <button id="todayBtn">Today</button>
         <button id="weekBtn">Last 7 Days</button>
         <button id="monthBtn">Last 30 Days</button>
-        <button id="exportPdfBtn">📄 Export Filtered PDF</button>
+        <button id="exportPdfBtn">📄 Export PDF</button>
+        <button id="exportExcelBtn">📊 Export Excel</button>
     </div>
     <div style="overflow-x: auto;">
         <table id="assessments-table">
-            <thead>
-                <tr><th>Name</th><th>File #</th><th>Age</th><th>Assessment Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr>
-            </thead>
+            <thead><tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr></thead>
             <tbody></tbody>
         </table>
+    </div>
+
+    <!-- Admin panel (only visible to admin users) -->
+    <div id="admin-panel" class="admin-section" style="display:none;">
+        <h3>Admin Panel – Manage Doctors</h3>
+        <form id="add-doctor-form">
+            <input type="email" id="new-email" placeholder="Doctor Email" required>
+            <input type="text" id="new-name" placeholder="Full Name" required>
+            <button type="submit">Add Doctor</button>
+        </form>
+        <table id="doctors-table">
+            <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <p><small>Note: New doctor must first exist in Supabase Auth (Authentication → Users → Add User). Then use same email here.</small></p>
     </div>
 </div>
 <div id="toast" class="toast"></div>
 
 <script>
+    // Supabase client (must match your keys)
+    const SUPABASE_URL = 'https://your-project.supabase.co';   // CHANGE
+    const SUPABASE_ANON_KEY = 'your-anon-key';                 // CHANGE
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let currentDoctor = null;
     let currentFilter = 'today';
     let currentData = [];
@@ -76,7 +100,10 @@
         if (error) throw error;
         currentDoctor = data;
         document.getElementById('doctor-name').innerText = data.full_name;
-        document.getElementById('doctor-shift').innerText = data.shift;
+        if (data.is_admin) {
+            document.getElementById('admin-panel').style.display = 'block';
+            loadDoctors();
+        }
         return data;
     }
 
@@ -90,7 +117,6 @@
         let query = supabase
             .from('assessments')
             .select('*')
-            .eq('shift', currentDoctor.shift)
             .gte('assessment_date', startDate)
             .order('assessment_date', { ascending: false });
         
@@ -121,28 +147,17 @@
             if (patient.cad) flags.push('CAD');
             if (patient.heart_failure) flags.push('HF');
             row.insertCell(6).innerText = flags.join(', ') || 'None';
-            const cell = row.insertCell(7);
             const viewBtn = document.createElement('button');
-            viewBtn.innerText = 'View Details';
-            viewBtn.className = 'view-btn';
-            viewBtn.onclick = () => showPatientDetails(patient);
-            cell.appendChild(viewBtn);
+            viewBtn.innerText = 'View';
+            viewBtn.onclick = () => alert(JSON.stringify(patient, null, 2));
+            row.insertCell(7).appendChild(viewBtn);
         });
-    }
-
-    function showPatientDetails(patient) {
-        // Simple modal – replace with a nicer modal if desired
-        let details = '';
-        for (let key in patient) {
-            if (key !== 'id' && key !== 'created_at') details += `${key}: ${patient[key]}\n`;
-        }
-        alert(details);
     }
 
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape');
-        doc.text(`Assessments - ${currentDoctor.shift} shift (${currentFilter})`, 14, 10);
+        doc.text(`Assessments (${currentFilter})`, 14, 10);
         doc.autoTable({
             head: [['Name', 'File #', 'Age', 'Date', 'ASA', 'BMI', 'HTN', 'DM', 'CAD', 'HF']],
             body: currentData.map(p => [
@@ -152,7 +167,16 @@
             ]),
             startY: 20
         });
-        doc.save(`assessments_${currentDoctor.shift}_${currentFilter}.pdf`);
+        doc.save(`assessments_${currentFilter}.pdf`);
+    }
+
+    async function exportToExcel() {
+        const { data, error } = await supabase.from('assessments').select('*');
+        if (error) return alert(error.message);
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Assessments');
+        XLSX.writeFile(wb, `all_assessments_${new Date().toISOString()}.xlsx`);
     }
 
     function showNotification(message) {
@@ -169,16 +193,59 @@
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
-                table: 'assessments',
-                filter: `shift=eq.${currentDoctor.shift}`
+                table: 'assessments'
             }, (payload) => {
-                showNotification(`🔔 New assessment from ${payload.new.name} (${payload.new.file_number || 'No file number'})`);
+                showNotification(`🔔 New assessment from ${payload.new.name} (${payload.new.file_number || 'No file'})`);
                 fetchAssessments(currentFilter);
             })
             .subscribe();
     }
 
-    // Login form handler
+    // Admin functions
+    async function loadDoctors() {
+        const { data, error } = await supabase.from('doctors').select('*');
+        if (error) throw error;
+        const tbody = document.querySelector('#doctors-table tbody');
+        tbody.innerHTML = '';
+        data.forEach(doc => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = doc.email;
+            row.insertCell(1).innerText = doc.full_name;
+            row.insertCell(2).innerText = doc.is_admin ? 'Yes' : 'No';
+            const actions = row.insertCell(3);
+            if (!doc.is_admin) {
+                const delBtn = document.createElement('button');
+                delBtn.innerText = 'Delete';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => deleteDoctor(doc.id);
+                actions.appendChild(delBtn);
+            }
+        });
+    }
+
+    async function deleteDoctor(doctorId) {
+        if (!confirm('Delete this doctor?')) return;
+        const { error } = await supabase.from('doctors').delete().eq('id', doctorId);
+        if (error) alert(error.message);
+        else loadDoctors();
+    }
+
+    async function addDoctor(email, fullName) {
+        // First check if user exists in auth (we need the ID)
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail?.(email);
+        if (userError || !userData) {
+            alert('User not found in Auth. Please create the user first in Supabase Auth → Users → Add User.');
+            return;
+        }
+        const userId = userData.user.id;
+        const { error } = await supabase
+            .from('doctors')
+            .insert([{ id: userId, email, full_name: fullName, is_admin: false }]);
+        if (error) alert(error.message);
+        else loadDoctors();
+    }
+
+    // Login flow
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
@@ -199,7 +266,17 @@
     document.getElementById('weekBtn').onclick = () => { currentFilter = 'week'; fetchAssessments('week'); };
     document.getElementById('monthBtn').onclick = () => { currentFilter = 'month'; fetchAssessments('month'); };
     document.getElementById('exportPdfBtn').onclick = exportToPDF;
-    document.getElementById('logoutBtn').onclick = () => logout().then(() => location.reload());
+    document.getElementById('exportExcelBtn').onclick = exportToExcel;
+    document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
+
+    if (document.getElementById('add-doctor-form')) {
+        document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('new-email').value;
+            const name = document.getElementById('new-name').value;
+            await addDoctor(email, name);
+        });
+    }
 </script>
 </body>
 </html>
