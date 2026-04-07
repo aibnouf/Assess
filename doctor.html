@@ -6,11 +6,11 @@
     <title>Doctor Dashboard | Pre‑Anesthetic</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module"> import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js'; const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
+        /* (keep your existing styles – same as before) */
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .login-form { max-width: 400px; margin: 50px auto; }
@@ -77,20 +77,14 @@
     </div>
     <div style="overflow-x: auto;">
         <table id="assessments-table">
-            <thead>
-                <tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th>
-            </thead>
+            <thead><tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr></thead>
             <tbody></tbody>
-          </table>
+        </table>
     </div>
-    
-    <!-- ADMIN PANEL (visible only to admin) -->
     <div id="admin-panel" class="admin-section" style="display:none;">
         <h3>Admin Panel – Manage Doctor Access</h3>
         <table id="doctors-table">
-            <thead>
-                <tr><th>Email</th><th>Name</th><th>Status</th><th>Admin</th><th>Actions</th></tr>
-            </thead>
+            <thead><tr><th>Email</th><th>Name</th><th>Status</th><th>Admin</th><th>Actions</th></tr></thead>
             <tbody></tbody>
         </table>
         <p><small>Pending doctors can be approved or rejected. Approved doctors must also exist in Auth (created automatically on sign‑up).</small></p>
@@ -99,19 +93,15 @@
 <div id="toast" class="toast"></div>
 
 <script type="module">
-    // ==================== SUPABASE CONFIGURATION ====================
     import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-    // ==================== GLOBALS ====================
     let currentDoctor = null;
     let currentFilter = 'today';
     let currentData = [];
     let subscription = null;
     
-    // ==================== LOGIN ====================
     async function login(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -135,7 +125,6 @@
         return data;
     }
     
-    // ==================== ASSESSMENTS ====================
     async function fetchAssessments(filter) {
         let startDate;
         const today = new Date().toISOString().split('T')[0];
@@ -230,7 +219,6 @@
             .subscribe();
     }
     
-    // ==================== ADMIN FUNCTIONS ====================
     async function loadAllDoctors() {
         const { data, error } = await supabase.from('doctors').select('*').order('created_at', { ascending: false });
         if (error) throw error;
@@ -277,9 +265,7 @@
         else loadAllDoctors();
     }
     
-    // ==================== SIGNUP (REQUEST ACCESS) ====================
     async function requestDoctorAccess(fullName, email, password) {
-        // 1. Create user in auth (required for login later)
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -287,7 +273,6 @@
         });
         if (signUpError) throw signUpError;
         
-        // 2. Insert into doctors table with status 'pending'
         const { error: insertError } = await supabase
             .from('doctors')
             .insert([{ 
@@ -297,11 +282,10 @@
                 is_admin: false 
             }]);
         if (insertError) throw insertError;
-        
         return true;
     }
     
-    // ==================== EVENT LISTENERS ====================
+    // Event listeners
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
@@ -325,7 +309,6 @@
     document.getElementById('exportExcelBtn').onclick = exportToExcel;
     document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
     
-    // Signup modal logic
     const modal = document.getElementById('signupModal');
     const showBtn = document.getElementById('showSignupBtn');
     const closeBtn = document.getElementById('closeModalBtn');
