@@ -12,19 +12,156 @@
 </head>
 <body>
     <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-    <header id="main-header">...</header>
+    <header id="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="header-main">
+                    <h1><i class="fas fa-stethoscope"></i> <span id="header-title">التقييم قبل التخدير</span></h1>
+                    <p class="tagline" id="header-tagline">نموذج مبسط لتقييم حالتك قبل العملية</p>
+                </div>
+                <div class="header-controls">
+                    <button type="button" id="darkModeToggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+                    <div class="lang-selector">
+                        <label for="langSelect" id="lang-label">🌐 اللغة</label>
+                        <select id="langSelect">
+                            <option value="ar">العربية</option><option value="en">English</option><option value="ur">اردو</option>
+                            <option value="hi">हिन्दी</option><option value="bn">বাংলা</option><option value="ne">नेपाली</option>
+                            <option value="fr">Français</option><option value="es">Español</option><option value="id">Bahasa Indonesia</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
     <main class="container">
         <div class="main-grid">
             <div class="form-panel">
                 <form id="screeningForm">
-                    <!-- All your existing sections (demographics, medical history, symptoms, medications, vitals, consent, buttons) -->
-                    <!-- ... keep everything exactly as you had, but DO NOT include the rec-panel div ... -->
+                    <!-- Demographics Section -->
+                    <div class="section" id="section-demographics">
+                        <h2 class="section-title"><i class="fas fa-user"></i> <span id="demographics-title">بياناتك</span><span class="section-done" id="done-demographics"></span></h2>
+                        <div class="form-row">
+                            <div class="form-group"><label for="fullName" id="label-fullName">الاسم الكامل *</label><input type="text" id="fullName" required></div>
+                            <div class="form-group"><label for="age" id="label-age">العمر *</label><input type="number" id="age" required></div>
+                            <div class="form-group"><label for="sex" id="label-sex">الجنس</label><select id="sex"><option value="">-- اختر --</option><option value="Male">ذكر</option><option value="Female">أنثى</option></select></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="weight" id="label-weight">الوزن (كغ)</label><input type="number" id="weight" step="0.1"></div>
+                            <div class="form-group"><label for="height" id="label-height">الطول (سم)</label><input type="number" id="height" step="0.1"></div>
+                            <div class="form-group"><label for="contact" id="label-contact">رقم الهاتف</label><input type="tel" id="contact"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="fileNumber" id="label-fileNumber">رقم الملف</label><input type="text" id="fileNumber"></div>
+                            <div class="form-group"><label for="assessmentDate" id="label-assessmentDate">تاريخ التقييم</label><input type="date" id="assessmentDate"></div>
+                        </div>
+                        <div id="bmiDisplay" class="bmi-display" style="display:none;"><i class="fas fa-weight"></i> <span id="bmi-label-text">BMI</span>: <strong id="bmiValue"></strong> <span class="bmi-badge" id="bmiCategory"></span> <span class="bmi-note" id="bmiNote"></span></div>
+                    </div>
+
+                    <!-- Medical History -->
+                    <div class="section" id="section-medical">
+                        <h2 class="section-title"><i class="fas fa-notes-medical"></i> <span id="medical-title">التاريخ الصحي</span><span class="section-done" id="done-medical"></span></h2>
+                        <div class="system-card"><h3><i class="fas fa-heart"></i> <span id="cardiac-title">أمراض القلب</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="hypertension"><label for="hypertension" id="label-hypertension">ضغط الدم المرتفع</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cad"><label for="cad" id="label-cad">تضيق شرايين القلب</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="heartFailure"><label for="heartFailure" id="label-heartFailure">ضعف عضلة القلب</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="atrialFib"><label for="atrialFib" id="label-atrialFib">اضطراب نبضات القلب</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="murmur"><label for="murmur" id="label-murmur">لغط في القلب</label></div>
+                            </div>
+                        </div>
+                        <div class="system-card"><h3><i class="fas fa-brain"></i> <span id="neuro-title">أمراض الأعصاب</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="stroke"><label for="stroke" id="label-stroke">جلطة دماغية سابقة</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="carotidBruit"><label for="carotidBruit" id="label-carotidBruit">لغط في شريان الرقبة</label></div>
+                            </div>
+                        </div>
+                        <div class="system-card"><h3><i class="fas fa-lungs"></i> <span id="respiratory-title">أمراض الجهاز التنفسي</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="copd"><label for="copd" id="label-copd">مرض رئوي مزمن / ربو</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="sleepApnea"><label for="sleepApnea" id="label-sleepApnea">انقطاع النفس أثناء النوم</label></div>
+                            </div>
+                        </div>
+                        <div class="system-card"><h3><i class="fas fa-kidneys"></i> <span id="renal-title">الكبد والكلى والدم</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="ckd"><label for="ckd" id="label-ckd">أمراض الكلى المزمنة</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="liverDisease"><label for="liverDisease" id="label-liverDisease">أمراض الكبد</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="bleedingDisorder"><label for="bleedingDisorder" id="label-bleedingDisorder">اضطرابات النزيف</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="anticoagulants"><label for="anticoagulants" id="label-anticoagulants">أدوية مميعة للدم</label></div>
+                            </div>
+                        </div>
+                        <div class="system-card"><h3><i class="fas fa-balance-scale"></i> <span id="metabolic-title">أمراض أخرى</span></h3>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item"><input type="checkbox" id="diabetes"><label for="diabetes" id="label-diabetes">السكري</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gerd"><label for="gerd" id="label-gerd">ارتجاع المريء</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familyMH"><label for="familyMH" id="label-familyMH">تاريخ عائلي - حرارة خبيثة</label></div>
+                            </div>
+                        </div>
+                        <div style="margin-top:20px;"><label for="otherMedical" id="label-otherMedical">حالات أخرى</label><input type="text" id="otherMedical"></div>
+                    </div>
+
+                    <!-- Symptoms -->
+                    <div class="section" id="section-symptoms">
+                        <h2 class="section-title"><i class="fas fa-thermometer-half"></i> <span id="symptoms-title">الأعراض الحالية</span><span class="section-done" id="done-symptoms"></span></h2>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item"><input type="checkbox" id="chestPain" class="symptom-cb"><label for="chestPain" id="label-chestPain">ألم في الصدر</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="palpitations" class="symptom-cb"><label for="palpitations" id="label-palpitations">خفقان</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dyspnea" class="symptom-cb"><label for="dyspnea" id="label-dyspnea">ضيق في النفس</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="syncope" class="symptom-cb"><label for="syncope" id="label-syncope">إغماء / دوخة شديدة</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fatigue" class="symptom-cb"><label for="fatigue" id="label-fatigue">تعب شديد</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="noSymptoms" class="no-symptom-cb"><label for="noSymptoms" id="label-noSymptoms">✅ لا توجد أعراض</label></div>
+                        </div>
+                    </div>
+
+                    <!-- Medications & Allergies -->
+                    <div class="section" id="section-meds">
+                        <h2 class="section-title"><i class="fas fa-pills"></i> <span id="meds-title">الأدوية والحساسية</span><span class="section-done" id="done-meds"></span></h2>
+                        <div class="form-group"><label for="medications" id="label-medications">الأدوية التي تتناولها</label><textarea id="medications" rows="3"></textarea><div class="char-count" id="meds-count">0 كلمة</div></div>
+                        <div style="display:flex;gap:10px;margin:15px 0;"><button type="button" id="scanMedsBtn" class="secondary-btn"><i class="fas fa-camera"></i> <span id="scan-btn-text">تصوير الدواء</span></button><input type="file" id="medImageInput" accept="image/*" style="display:none;"><span id="ocrStatus"></span></div>
+                        <div class="form-group"><label for="allergies" id="label-allergies">الحساسية</label><textarea id="allergies" rows="2"></textarea></div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="section" id="section-additional">
+                        <h2 class="section-title"><i class="fas fa-clipboard-list"></i> <span id="additional-title">معلومات إضافية</span><span class="section-done" id="done-additional"></span></h2>
+                        <div class="form-row">
+                            <div class="form-group"><label for="smoking" id="label-smoking">التدخين</label><select id="smoking"><option value="Never">لا أدخن</option><option value="Former">كنت أدخن سابقاً</option><option value="Current">أدخن حالياً</option></select></div>
+                            <div class="form-group"><label for="alcohol" id="label-alcohol">الكحول</label><select id="alcohol"><option value="None">لا أتناول</option><option value="Moderate">قليلاً</option><option value="Heavy">كثيراً</option></select></div>
+                            <div class="form-group"><label for="npoStatus" id="label-npoStatus">حالة الصيام</label><select id="npoStatus"><option value="Unknown">غير محدد</option><option value="Yes">صائم</option><option value="No">غير صائم</option></select></div>
+                        </div>
+                        <div class="form-group"><label for="surgicalHistory" id="label-surgicalHistory">العمليات الجراحية السابقة</label><textarea id="surgicalHistory" rows="2"></textarea></div>
+                        <div class="form-group"><label for="prevAnesthesia" id="label-prevAnesthesia">مضاعفات تخدير سابقة</label><textarea id="prevAnesthesia" rows="2"></textarea></div>
+                        <div class="form-group"><label for="dental" id="label-dental">مشاكل الأسنان</label><input type="text" id="dental"></div>
+                    </div>
+
+                    <!-- Vital Signs -->
+                    <div class="section" id="section-vitals">
+                        <h2 class="section-title"><i class="fas fa-heartbeat"></i> <span id="vitals-title">العلامات الحيوية (اختياري)</span><span class="section-done" id="done-vitals"></span></h2>
+                        <div class="form-row">
+                            <div class="form-group"><label for="bpSystolic" id="label-bpSystolic">الضغط الانقباضي</label><input type="number" id="bpSystolic" class="vital-input"><span class="vital-hint" id="hint-bpSystolic"></span></div>
+                            <div class="form-group"><label for="bpDiastolic" id="label-bpDiastolic">الضغط الانبساطي</label><input type="number" id="bpDiastolic" class="vital-input"><span class="vital-hint" id="hint-bpDiastolic"></span></div>
+                            <div class="form-group"><label for="heartRate" id="label-heartRate">نبضات القلب</label><input type="number" id="heartRate" class="vital-input"><span class="vital-hint" id="hint-heartRate"></span></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label for="respRate" id="label-respRate">معدل التنفس</label><input type="number" id="respRate" class="vital-input"><span class="vital-hint" id="hint-respRate"></span></div>
+                            <div class="form-group"><label for="spo2" id="label-spo2">نسبة الأوكسجين (%)</label><input type="number" id="spo2" class="vital-input"><span class="vital-hint" id="hint-spo2"></span></div>
+                            <div class="form-group"><label for="temperature" id="label-temperature">درجة الحرارة</label><input type="number" id="temperature" step="0.1" class="vital-input"><span class="vital-hint" id="hint-temperature"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- Consent -->
+                    <div class="consent-area"><input type="checkbox" id="consentCheck" required><label for="consentCheck" id="consent-text">أوافق على ملء هذا النموذج طواعية، وأعلم أن المعلومات ستساعد فريق التخدير.</label></div>
+
+                    <div class="action-buttons"><button type="submit" id="submit-btn"><i class="fas fa-save"></i> <span id="submit-btn-text">حفظ</span></button><button type="button" id="printBtn" class="secondary-btn"><i class="fas fa-print"></i> <span id="print-btn-text">طباعة</span></button></div>
+                    <div id="statusMessage" class="status-message"></div>
+                    <div id="autosave-badge" class="autosave-badge" style="display:none;"><i class="fas fa-cloud-check"></i> <span id="autosave-text">تم الحفظ التلقائي</span></div>
                 </form>
             </div>
-            <!-- NO rec-panel here – removed entirely -->
+            <!-- NO RECOMMENDATIONS PANEL HERE -->
         </div>
     </main>
-    <button id="scrollTopBtn">...</button>
-    <footer>...</footer>
+
+    <button id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
+    <footer><div class="container"><p><strong>فريق التخدير</strong> – نحن هنا لمساعدتك</p></div></footer>
 </body>
 </html>
