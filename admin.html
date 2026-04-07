@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Pre‑Anesthetic</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+    <style>
+        body { background: #f0f2f5; font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2, h3 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 13px; }
+        th { background: #34495e; color: white; }
+        .section { margin-bottom: 40px; }
+        input, select, button { padding: 8px 12px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
+        button { background: #2c6e9e; color: white; cursor: pointer; border: none; }
+        button:hover { background: #1b4f72; }
+        .delete-btn { background: #c0392b; }
+    </style>
+</head>
+<body>
+<div id="login-container" class="container">
+    <h2>Admin Login</h2>
+    <form id="login-form">
+        <input type="email" id="email" placeholder="Email" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<div id="admin-container" style="display:none;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between;">
+            <h2>Admin Dashboard</h2>
+            <button id="logoutBtn" class="delete-btn">Logout</button>
+        </div>
+        <button id="exportAllExcel">📊 Export All Assessments to Excel</button>
+
+        <div class="section">
+            <h3>Manage Doctors</h3>
+            <form id="add-doctor-form">
+                <input type="email" id="doc-email" placeholder="Email" required>
+                <input type="text" id="doc-name" placeholder="Full Name" required>
+                <select id="doc-shift">
+                    <option value="Morning">Morning</option>
+                    <option value="Evening">Evening</option>
+                </select>
+                <input type="email" id="doc-notify" placeholder="Notification Email (optional)">
+                <button type="submit">Add Doctor</button>
+            </form>
+            <table id="doctors-table">
+                <thead><tr><th>Email</th><th>Name</th><th>Shift</th><th>Admin</th><th>Actions</th></tr></thead>
+                <tbody></tbody>
+            </table>
+            <p><small>Note: To add a doctor, first create the user in Supabase Auth (Authentication → Users → Add User). Then use the same email here to link the doctor record.</small></p>
+        </div>
+
+        <div class="section">
+            <h3>All Assessments (All Shifts)</h3>
+            <input type="text" id="search" placeholder="Search by name or file number..." style="width: 300px;">
+            <table id="all-assessments-table">
+                <thead><tr><th>Name</th><th>File #</th><th>Shift</th><th>Date</th><th>ASA</th><th>BMI</th><th>Created At</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentAdmin = null;
+    let allAssessments = [];
+
+    async function login(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        return data.user;
+    }
+
+    async function loadAdminProfile(userId) {
+        const { data, error } = await supabase
+            .from('doctors')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        if (error || !data.is_admin) throw new Error('Not an admin');
+        currentAdmin = data;
+        return data;
+    }
+
+    async function loadDoctors() {
+        const { data, error } = await supabase.from('doctors').select('*');
+        if (error) throw error;
+        const tbody = document.querySelector('#doctors-table tbody');
+        tbody.innerHTML = '';
+        data.forEach(doc => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = doc.email;
+            row.insertCell(1).innerText = doc.full_name;
+            row.insertCell(2).innerText = doc.shift;
+            row.insertCell(3).innerText = doc.is_admin ? 'Yes' : 'No';
+            const actions = row.insertCell(4);
+            const delBtn = document.createElement('button');
+            delBtn.innerText = 'Delete';
+            delBtn.className = 'delete-btn';
+            delBtn.onclick = () => deleteDoctor(doc.id);
+            actions.appendChild(delBtn);
+        });
+    }
+
+    async function deleteDoctor(doctorId) {
+        if (!confirm('Delete this doctor? They will lose access.')) return;
+        const { error } = await supabase.from('doctors').delete().eq('id', doctorId);
+        if (error) alert(error.message);
+        else loadDoctors();
+    }
+
+    async function addDoctor(email, fullName, shift, notificationEmail) {
+        // We need the user ID from auth. If user doesn't exist, show error.
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail?.(email);
+        if (userError || !userData) {
+            alert('User not found in Auth. Please create the user first in Supabase Auth → Users → Add User.');
+            return;
+        }
+        const userId = userData.user.id;
+        const { error } = await supabase
+            .from('doctors')
+            .insert([{ id: userId, email, full_name: fullName, shift, notification_email: notificationEmail, is_admin: false }]);
+        if (error) alert(error.message);
+        else loadDoctors();
+    }
+
+    async function loadAllAssessments() {
+        const { data, error } = await supabase
+            .from('assessments')
+            .select('*')
+            .order('assessment_date', { ascending: false });
+        if (error) throw error;
+        allAssessments = data;
+        renderAllAssessments(data);
+    }
+
+    function renderAllAssessments(data) {
+        const tbody = document.querySelector('#all-assessments-table tbody');
+        tbody.innerHTML = '';
+        data.forEach(a => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = a.name;
+            row.insertCell(1).innerText = a.file_number || '';
+            row.insertCell(2).innerText = a.shift;
+            row.insertCell(3).innerText = a.assessment_date;
+            row.insertCell(4).innerText = a.asa_class || '';
+            row.insertCell(5).innerText = a.bmi || '';
+            row.insertCell(6).innerText = new Date(a.created_at).toLocaleString();
+        });
+    }
+
+    async function exportAllToExcel() {
+        const { data, error } = await supabase.from('assessments').select('*');
+        if (error) return alert(error.message);
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Assessments');
+        XLSX.writeFile(wb, `all_assessments_${new Date().toISOString()}.xlsx`);
+    }
+
+    // Search filter
+    document.getElementById('search').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = allAssessments.filter(a => 
+            a.name.toLowerCase().includes(term) || (a.file_number && a.file_number.toLowerCase().includes(term))
+        );
+        renderAllAssessments(filtered);
+    });
+
+    // Login
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const user = await login(email, password);
+            await loadAdminProfile(user.id);
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('admin-container').style.display = 'block';
+            await loadDoctors();
+            await loadAllAssessments();
+        } catch (err) {
+            alert('Admin login failed: ' + err.message);
+        }
+    });
+
+    document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('doc-email').value;
+        const name = document.getElementById('doc-name').value;
+        const shift = document.getElementById('doc-shift').value;
+        const notify = document.getElementById('doc-notify').value;
+        await addDoctor(email, name, shift, notify);
+    });
+
+    document.getElementById('exportAllExcel').onclick = exportAllToExcel;
+    document.getElementById('logoutBtn').onclick = () => logout().then(() => location.reload());
+</script>
+</body>
+</html>
