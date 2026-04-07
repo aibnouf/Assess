@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard | Pre‑Anesthetic</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7fc; margin: 0; padding: 20px; }
+        .login-container, .dashboard-container { max-width: 1300px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; vertical-align: top; }
+        th { background: #2c6e9e; color: white; }
+        .filters { margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap; }
+        button { background: #2c6e9e; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #1b4f72; }
+        .logout-btn { background: #c0392b; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; }
+        .view-btn { background: #f39c12; margin-left: 5px; }
+    </style>
+</head>
+<body>
+<div id="login-container" class="login-container">
+    <h2>Doctor Login</h2>
+    <form id="login-form">
+        <input type="email" id="email" placeholder="Email" required style="width:100%; padding:10px; margin-bottom:10px;"><br>
+        <input type="password" id="password" placeholder="Password" required style="width:100%; padding:10px; margin-bottom:10px;"><br>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<div id="dashboard-container" class="dashboard-container" style="display:none;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Welcome, <span id="doctor-name"></span> (<span id="doctor-shift"></span> shift)</h2>
+        <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+    <div class="filters">
+        <button id="todayBtn">Today</button>
+        <button id="weekBtn">Last 7 Days</button>
+        <button id="monthBtn">Last 30 Days</button>
+        <button id="exportPdfBtn">📄 Export Filtered PDF</button>
+    </div>
+    <div style="overflow-x: auto;">
+        <table id="assessments-table">
+            <thead>
+                <tr><th>Name</th><th>File #</th><th>Age</th><th>Assessment Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+    let currentDoctor = null;
+    let currentFilter = 'today';
+    let currentData = [];
+    let subscription = null;
+
+    async function login(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        return data.user;
+    }
+
+    async function loadDoctorProfile(userId) {
+        const { data, error } = await supabase
+            .from('doctors')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        if (error) throw error;
+        currentDoctor = data;
+        document.getElementById('doctor-name').innerText = data.full_name;
+        document.getElementById('doctor-shift').innerText = data.shift;
+        return data;
+    }
+
+    async function fetchAssessments(filter) {
+        let startDate;
+        const today = new Date().toISOString().split('T')[0];
+        if (filter === 'today') startDate = today;
+        else if (filter === 'week') startDate = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+        else if (filter === 'month') startDate = new Date(Date.now() - 30*86400000).toISOString().split('T')[0];
+        
+        let query = supabase
+            .from('assessments')
+            .select('*')
+            .eq('shift', currentDoctor.shift)
+            .gte('assessment_date', startDate)
+            .order('assessment_date', { ascending: false });
+        
+        const { data, error } = await query;
+        if (error) throw error;
+        currentData = data;
+        renderTable(data);
+    }
+
+    function renderTable(data) {
+        const tbody = document.querySelector('#assessments-table tbody');
+        tbody.innerHTML = '';
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="8">No assessments found.</td></tr>';
+            return;
+        }
+        data.forEach(patient => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = patient.name;
+            row.insertCell(1).innerText = patient.file_number || '—';
+            row.insertCell(2).innerText = patient.age || '—';
+            row.insertCell(3).innerText = patient.assessment_date;
+            row.insertCell(4).innerText = patient.asa_class || '—';
+            row.insertCell(5).innerText = patient.bmi || '—';
+            const flags = [];
+            if (patient.hypertension) flags.push('HTN');
+            if (patient.diabetes) flags.push('DM');
+            if (patient.cad) flags.push('CAD');
+            if (patient.heart_failure) flags.push('HF');
+            row.insertCell(6).innerText = flags.join(', ') || 'None';
+            const cell = row.insertCell(7);
+            const viewBtn = document.createElement('button');
+            viewBtn.innerText = 'View Details';
+            viewBtn.className = 'view-btn';
+            viewBtn.onclick = () => showPatientDetails(patient);
+            cell.appendChild(viewBtn);
+        });
+    }
+
+    function showPatientDetails(patient) {
+        // Simple modal – replace with a nicer modal if desired
+        let details = '';
+        for (let key in patient) {
+            if (key !== 'id' && key !== 'created_at') details += `${key}: ${patient[key]}\n`;
+        }
+        alert(details);
+    }
+
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        doc.text(`Assessments - ${currentDoctor.shift} shift (${currentFilter})`, 14, 10);
+        doc.autoTable({
+            head: [['Name', 'File #', 'Age', 'Date', 'ASA', 'BMI', 'HTN', 'DM', 'CAD', 'HF']],
+            body: currentData.map(p => [
+                p.name, p.file_number || '', p.age || '', p.assessment_date,
+                p.asa_class || '', p.bmi || '',
+                p.hypertension ? '✓' : '', p.diabetes ? '✓' : '', p.cad ? '✓' : '', p.heart_failure ? '✓' : ''
+            ]),
+            startY: 20
+        });
+        doc.save(`assessments_${currentDoctor.shift}_${currentFilter}.pdf`);
+    }
+
+    function showNotification(message) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 5000);
+    }
+
+    function subscribeToNewAssessments() {
+        if (subscription) return;
+        subscription = supabase
+            .channel('assessments-channel')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'assessments',
+                filter: `shift=eq.${currentDoctor.shift}`
+            }, (payload) => {
+                showNotification(`🔔 New assessment from ${payload.new.name} (${payload.new.file_number || 'No file number'})`);
+                fetchAssessments(currentFilter);
+            })
+            .subscribe();
+    }
+
+    // Login form handler
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const user = await login(email, password);
+            await loadDoctorProfile(user.id);
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('dashboard-container').style.display = 'block';
+            await fetchAssessments('today');
+            subscribeToNewAssessments();
+        } catch (err) {
+            alert('Login failed: ' + err.message);
+        }
+    });
+
+    document.getElementById('todayBtn').onclick = () => { currentFilter = 'today'; fetchAssessments('today'); };
+    document.getElementById('weekBtn').onclick = () => { currentFilter = 'week'; fetchAssessments('week'); };
+    document.getElementById('monthBtn').onclick = () => { currentFilter = 'month'; fetchAssessments('month'); };
+    document.getElementById('exportPdfBtn').onclick = exportToPDF;
+    document.getElementById('logoutBtn').onclick = () => logout().then(() => location.reload());
+</script>
+</body>
+</html>
