@@ -53,12 +53,11 @@ A multilingual, feature-rich pre-anesthetic screening web application for anesth
 
 ```
 /
-├── index.html               # Patient form (multilingual, with shift dropdown)
-├── doctorspage.html         # Doctor dashboard (login, real‑time table, PDF export)
-├── admin.html               # Admin panel (manage doctors, view all data)
-├── style.css                # Your existing CSS (unchanged)
-├── script.js                # Shared Supabase client and helpers
-└── README.md                # Documentation
+├── index.html          # Landing page (Patient / Doctor)
+├── patient.html        # Multilingual patient form (no shift)
+├── doctor.html         # Doctor dashboard (login, table, PDF, real‑time, admin)
+├── script.js           # Shared Supabase client + helpers
+└── style.css           # Your existing styles (unchanged)
 ```
 
 ## 🚀 Quick Start
