@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* (keep your existing styles – same as before) */
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .login-form { max-width: 400px; margin: 50px auto; }
@@ -22,21 +21,12 @@
         th { background: #34495e; color: white; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #27ae60; color: white; padding: 12px 20px; border-radius: 8px; display: none; z-index: 1000; }
         .admin-section { margin-top: 40px; border-top: 2px solid #ccc; padding-top: 20px; }
-        .approve-btn { background: #27ae60; margin-left: 5px; }
-        .reject-btn { background: #c0392b; margin-left: 5px; }
+        .delete-btn { background: #c0392b; margin-left: 5px; }
         .logout-btn { background: #e67e22; }
-        .request-btn { background: #3498db; margin-top: 10px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal-content { background: white; max-width: 400px; margin: 100px auto; padding: 20px; border-radius: 16px; }
-        .modal-content input { width: 100%; margin: 8px 0; }
-        .modal-content button { margin-top: 10px; }
-        .status-pending { color: #f39c12; font-weight: bold; }
-        .status-approved { color: #27ae60; font-weight: bold; }
-        .status-rejected { color: #c0392b; font-weight: bold; }
+        .note { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
     </style>
 </head>
 <body>
-<!-- LOGIN CONTAINER -->
 <div id="login-container" class="container login-form">
     <h2>Doctor Login</h2>
     <form id="login-form">
@@ -44,25 +34,8 @@
         <input type="password" id="password" placeholder="Password" required>
         <button type="submit">Login</button>
     </form>
-    <button id="showSignupBtn" class="request-btn">Request Access</button>
 </div>
 
-<!-- SIGNUP MODAL -->
-<div id="signupModal" class="modal">
-    <div class="modal-content">
-        <h3>Request Doctor Access</h3>
-        <form id="signupForm">
-            <input type="text" id="signupName" placeholder="Full Name" required>
-            <input type="email" id="signupEmail" placeholder="Email" required>
-            <input type="password" id="signupPassword" placeholder="Password" required>
-            <button type="submit">Submit Request</button>
-            <button type="button" id="closeModalBtn">Cancel</button>
-        </form>
-        <div id="signupMessage"></div>
-    </div>
-</div>
-
-<!-- DASHBOARD CONTAINER -->
 <div id="dashboard-container" class="container" style="display:none;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Welcome, <span id="doctor-name"></span></h2>
@@ -77,54 +50,69 @@
     </div>
     <div style="overflow-x: auto;">
         <table id="assessments-table">
-            <thead><tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr></thead>
+            <thead>
+                <tr><th>Name</th><th>File #</th><th>Age</th><th>Date</th><th>ASA</th><th>BMI</th><th>Key Flags</th><th>Actions</th></tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
     <div id="admin-panel" class="admin-section" style="display:none;">
-        <h3>Admin Panel – Manage Doctor Access</h3>
+        <h3>Admin Panel – Manage Doctors</h3>
+        <form id="add-doctor-form">
+            <input type="email" id="new-email" placeholder="Doctor Email" required>
+            <input type="text" id="new-name" placeholder="Full Name" required>
+            <button type="submit">Add Doctor</button>
+        </form>
+        <p class="note">⚠️ Doctor must first exist in Supabase Auth (Authentication → Users → Add User). Then use same email here.</p>
         <table id="doctors-table">
-            <thead><tr><th>Email</th><th>Name</th><th>Status</th><th>Admin</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
             <tbody></tbody>
         </table>
-        <p><small>Pending doctors can be approved or rejected. Approved doctors must also exist in Auth (created automatically on sign‑up).</small></p>
     </div>
 </div>
 <div id="toast" class="toast"></div>
 
-<script type="module">
-    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
-    
+<script>
+    // Supabase credentials (replace with your actual values)
+    const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
+    const SUPABASE_ANON_KEY = 'your-anon-key'; // REPLACE
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+
     let currentDoctor = null;
     let currentFilter = 'today';
     let currentData = [];
     let subscription = null;
-    
+
     async function login(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         return data.user;
     }
-    
-    async function loadDoctorProfile(email) {
+
+    async function loadDoctorProfile(userId) {
+        // Fetch doctor record from the doctors table
         const { data, error } = await supabase
             .from('doctors')
             .select('*')
-            .eq('email', email)
-            .single();
+            .eq('id', userId)
+            .maybeSingle();
+
         if (error) throw error;
-        if (data.status !== 'approved') throw new Error('Your account is not approved yet.');
+
+        if (!data) {
+            // Doctor record missing – show error and logout
+            throw new Error('No doctor profile found. Please contact admin.');
+        }
+
         currentDoctor = data;
         document.getElementById('doctor-name').innerText = data.full_name;
         if (data.is_admin) {
             document.getElementById('admin-panel').style.display = 'block';
-            loadAllDoctors();
+            loadDoctors();
         }
         return data;
     }
-    
+
     async function fetchAssessments(filter) {
         let startDate;
         const today = new Date().toISOString().split('T')[0];
@@ -143,7 +131,7 @@
         currentData = data;
         renderTable(data);
     }
-    
+
     function renderTable(data) {
         const tbody = document.querySelector('#assessments-table tbody');
         tbody.innerHTML = '';
@@ -171,7 +159,7 @@
             row.insertCell(7).appendChild(viewBtn);
         });
     }
-    
+
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('landscape');
@@ -187,7 +175,7 @@
         });
         doc.save(`assessments_${currentFilter}.pdf`);
     }
-    
+
     async function exportToExcel() {
         const { data, error } = await supabase.from('assessments').select('*');
         if (error) return alert(error.message);
@@ -196,14 +184,14 @@
         XLSX.utils.book_append_sheet(wb, ws, 'Assessments');
         XLSX.writeFile(wb, `all_assessments_${new Date().toISOString()}.xlsx`);
     }
-    
+
     function showNotification(message) {
         const toast = document.getElementById('toast');
         toast.innerText = message;
         toast.style.display = 'block';
         setTimeout(() => toast.style.display = 'none', 5000);
     }
-    
+
     function subscribeToNewAssessments() {
         if (subscription) return;
         subscription = supabase
@@ -218,9 +206,10 @@
             })
             .subscribe();
     }
-    
-    async function loadAllDoctors() {
-        const { data, error } = await supabase.from('doctors').select('*').order('created_at', { ascending: false });
+
+    // Admin functions
+    async function loadDoctors() {
+        const { data, error } = await supabase.from('doctors').select('*');
         if (error) throw error;
         const tbody = document.querySelector('#doctors-table tbody');
         tbody.innerHTML = '';
@@ -228,71 +217,46 @@
             const row = tbody.insertRow();
             row.insertCell(0).innerText = doc.email;
             row.insertCell(1).innerText = doc.full_name;
-            const statusSpan = document.createElement('span');
-            statusSpan.innerText = doc.status;
-            statusSpan.className = `status-${doc.status}`;
-            row.insertCell(2).appendChild(statusSpan);
-            row.insertCell(3).innerText = doc.is_admin ? 'Yes' : 'No';
-            const actions = row.insertCell(4);
-            if (doc.status === 'pending') {
-                const approveBtn = document.createElement('button');
-                approveBtn.innerText = 'Approve';
-                approveBtn.className = 'approve-btn';
-                approveBtn.onclick = () => updateDoctorStatus(doc.id, 'approved');
-                actions.appendChild(approveBtn);
-                
-                const rejectBtn = document.createElement('button');
-                rejectBtn.innerText = 'Reject';
-                rejectBtn.className = 'reject-btn';
-                rejectBtn.onclick = () => updateDoctorStatus(doc.id, 'rejected');
-                actions.appendChild(rejectBtn);
-            } else if (doc.status === 'approved' && !doc.is_admin && doc.email !== currentDoctor.email) {
-                const rejectBtn = document.createElement('button');
-                rejectBtn.innerText = 'Revoke';
-                rejectBtn.className = 'reject-btn';
-                rejectBtn.onclick = () => updateDoctorStatus(doc.id, 'rejected');
-                actions.appendChild(rejectBtn);
+            row.insertCell(2).innerText = doc.is_admin ? 'Yes' : 'No';
+            const actions = row.insertCell(3);
+            if (!doc.is_admin) {
+                const delBtn = document.createElement('button');
+                delBtn.innerText = 'Delete';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => deleteDoctor(doc.id);
+                actions.appendChild(delBtn);
             }
         });
     }
-    
-    async function updateDoctorStatus(doctorId, newStatus) {
-        const { error } = await supabase
-            .from('doctors')
-            .update({ status: newStatus })
-            .eq('id', doctorId);
-        if (error) alert('Error: ' + error.message);
-        else loadAllDoctors();
+
+    async function deleteDoctor(doctorId) {
+        if (!confirm('Delete this doctor?')) return;
+        const { error } = await supabase.from('doctors').delete().eq('id', doctorId);
+        if (error) alert(error.message);
+        else loadDoctors();
     }
-    
-    async function requestDoctorAccess(fullName, email, password) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: { data: { full_name: fullName } }
-        });
-        if (signUpError) throw signUpError;
-        
-        const { error: insertError } = await supabase
-            .from('doctors')
-            .insert([{ 
-                email: email, 
-                full_name: fullName, 
-                status: 'pending',
-                is_admin: false 
-            }]);
-        if (insertError) throw insertError;
-        return true;
+
+    async function addDoctor(email, fullName) {
+        // First, check if the user exists in auth.users
+        // We need to fetch the user ID using admin API – but client-side cannot do that.
+        // Instead, we ask the admin to create the user in Auth dashboard first.
+        // Then the admin can manually insert the record via SQL or we can try to fetch by email.
+        // For simplicity, we'll assume the user already exists in auth, and we'll attempt to get their ID via a query.
+        // This is not possible with anon key, so we'll show a helpful error.
+        alert('Please create the user first in Supabase Authentication → Users → Add User. Then insert their record manually via SQL Editor, or contact your developer.');
+        return;
+
+        // If you have a server-side endpoint, you could implement it. For now, manual insert is safest.
     }
-    
-    // Event listeners
+
+    // Login flow
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         try {
             const user = await login(email, password);
-            await loadDoctorProfile(email);
+            await loadDoctorProfile(user.id);
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('dashboard-container').style.display = 'block';
             await fetchAssessments('today');
@@ -301,39 +265,22 @@
             alert('Login failed: ' + err.message);
         }
     });
-    
+
     document.getElementById('todayBtn').onclick = () => { currentFilter = 'today'; fetchAssessments('today'); };
     document.getElementById('weekBtn').onclick = () => { currentFilter = 'week'; fetchAssessments('week'); };
     document.getElementById('monthBtn').onclick = () => { currentFilter = 'month'; fetchAssessments('month'); };
     document.getElementById('exportPdfBtn').onclick = exportToPDF;
     document.getElementById('exportExcelBtn').onclick = exportToExcel;
     document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
-    
-    const modal = document.getElementById('signupModal');
-    const showBtn = document.getElementById('showSignupBtn');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const signupForm = document.getElementById('signupForm');
-    const signupMessage = document.getElementById('signupMessage');
-    
-    showBtn.addEventListener('click', () => { modal.style.display = 'block'; });
-    closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
-    window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-    
-    signupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fullName = document.getElementById('signupName').value;
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        signupMessage.innerText = 'Submitting request...';
-        try {
-            await requestDoctorAccess(fullName, email, password);
-            signupMessage.innerText = 'Request submitted. Admin will review and approve.';
-            signupForm.reset();
-            setTimeout(() => { modal.style.display = 'none'; signupMessage.innerText = ''; }, 3000);
-        } catch (err) {
-            signupMessage.innerText = 'Error: ' + err.message;
-        }
-    });
+
+    if (document.getElementById('add-doctor-form')) {
+        document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('new-email').value;
+            const name = document.getElementById('new-name').value;
+            await addDoctor(email, name);
+        });
+    }
 </script>
 </body>
 </html>
