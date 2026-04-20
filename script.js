@@ -1080,6 +1080,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function isChecked(el) { return el ? el.checked : false; }
 
+    // --- Fix header overlap ---
+    function adjustBodyPadding() {
+        const header = document.getElementById('main-header');
+        if (!header) return;
+        document.body.style.paddingTop = (header.offsetHeight + 10) + 'px';
+    }
+
+    const header = document.getElementById('main-header');
+    if (header) {
+        if (window.ResizeObserver) {
+            const observer = new ResizeObserver(() => adjustBodyPadding());
+            observer.observe(header);
+        } else {
+            window.addEventListener('resize', adjustBodyPadding);
+        }
+        adjustBodyPadding();
+    }
+    // --------------------------
     // ==================== BMI ====================
     function updateBMI() {
         const w = parseFloat(weightEl?.value || 0);
