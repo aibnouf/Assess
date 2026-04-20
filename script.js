@@ -70,13 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const bmiNote = document.getElementById('bmiNote');
     const medsCountEl = document.getElementById('meds-count');
 
+    // Set default assessment date
     if (assessmentDate && !assessmentDate.value) {
         assessmentDate.value = new Date().toISOString().split('T')[0];
     }
 
+    // Helper: is element checked
     function isChecked(el) { return el ? el.checked : false; }
 
-    // ==================== BMI ====================
+    // ==================== BMI Calculation ====================
     function updateBMI() {
         const w = parseFloat(weightEl?.value || 0);
         const h = parseFloat(heightEl?.value || 0);
@@ -99,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (weightEl) weightEl.addEventListener('input', () => { updateBMI(); updateASA(); updateProgress(); });
     if (heightEl) heightEl.addEventListener('input', () => { updateBMI(); updateASA(); updateProgress(); });
 
-    // ==================== Vital signs ====================
+    // ==================== Vital Signs Validation ====================
     const vitalRanges = {
         bpSystolic: { low:80, high:140, critical:180 },
         bpDiastolic: { low:50, high:90, critical:120 },
@@ -133,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.addEventListener('input', () => checkVital(id));
     });
 
-    // ==================== ASA ====================
+    // ==================== ASA Classification ====================
     function updateASA() {
         const ageVal = parseInt(age.value) || 0;
         const bmiVal = updateBMI();
@@ -152,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return score;
     }
 
-    // ==================== No symptoms mutual exclusivity ====================
+    // ==================== No Symptoms Mutual Exclusivity ====================
     const symptomCbs = document.querySelectorAll('.symptom-cb');
     const noSymptomCb = document.getElementById('noSymptoms');
     if (noSymptomCb) {
@@ -164,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cb.checked && noSymptomCb) noSymptomCb.checked = false;
     }));
 
-    // ==================== Word counter ====================
+    // ==================== Word Counter ====================
     if (medsTextarea && medsCountEl) {
         const refreshCount = () => {
             const words = medsTextarea.value.trim().split(/\s+/).filter(Boolean).length;
@@ -174,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         medsTextarea.addEventListener('input', refreshCount);
     }
 
-    // ==================== Progress ====================
+    // ==================== Progress Bar ====================
     function updateProgress() {
         const nameOk = !!(document.getElementById('fullName').value||'').trim();
         const ageOk = !!(age.value||'').trim();
@@ -249,6 +251,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input,select,textarea').forEach(el => el.addEventListener('change', saveToLS));
     loadFromLS();
 
+    // ==================== Clear Form (New Form) ====================
+    function clearFormAndStorage() {
+        form.reset();
+        if (assessmentDate) assessmentDate.value = new Date().toISOString().split('T')[0];
+        localStorage.removeItem(LS_KEY);
+        updateBMI();
+        updateASA();
+        updateProgress();
+        consentCheck.checked = false;
+        if (bmiDisplay) bmiDisplay.style.display = 'none';
+        statusMsg.innerText = '';
+    }
+    const clearBtn = document.getElementById('clearFormBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (confirm(translations[langSelect.value]['confirm-clear'] || 'Start a new form? All current data will be lost.')) {
+                clearFormAndStorage();
+            }
+        });
+    }
+
     // ==================== Dark mode ====================
     const darkBtn = document.getElementById('darkModeToggle');
     if (localStorage.getItem('darkMode') === 'on') {
@@ -294,26 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const opt = document.getElementById(id);
             if (opt) opt.innerText = t[id] || fallback[id] || id;
         });
-
-
-        function sanitizeRecord(record) {
-    const numericFields = [
-        'age', 'weight', 'height', 'bmi',
-        'bp_systolic', 'bp_diastolic', 'heart_rate',
-        'resp_rate', 'spo2', 'temperature'
-    ];
-    
-    const sanitized = { ...record };
-    
-    numericFields.forEach(field => {
-        if (sanitized[field] === '' || sanitized[field] === undefined) {
-            sanitized[field] = null;
-        }
-    });
-    
-    return sanitized;
-}
-        
         const submitEl = document.getElementById('submit-btn');
         if (submitEl) submitEl.innerHTML = `<i class="fas fa-save"></i> <span id="submit-btn-text">${t['submit-btn']||'Save'}</span>`;
         const scanEl = document.getElementById('scan-btn-text');
@@ -322,6 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (printEl) printEl.innerText = t['print-btn-text']||'Print';
         const autosaveEl = document.getElementById('autosave-text');
         if (autosaveEl) autosaveEl.innerText = t['autosave-text']||'Auto-saved';
+        const clearBtnText = document.getElementById('clear-btn-text');
+        if (clearBtnText) clearBtnText.innerText = t['clear-btn-text']||'New Form';
         const bmiLblEl = document.getElementById('bmi-label-text');
         if (bmiLblEl) bmiLblEl.innerText = t['bmi-label']||'BMI';
         updateBMI(); updateASA();
@@ -395,20 +400,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const asaClass = updateASA();
         const bmiVal = updateBMI();
 
+        // Helper: convert empty strings to null for numeric fields
+        const numOrNull = (value) => {
+            if (value === '' || value === undefined || value === null) return null;
+            const num = parseFloat(value);
+            return isNaN(num) ? null : num;
+        };
+
         const record = {
             name: document.getElementById('fullName').value.trim(),
-            age: age.value,
-            sex: document.getElementById('sex').value,
-            weight: weightEl.value,
-            height: heightEl.value,
-            bmi: bmiVal ? bmiVal.toFixed(1) : '',
-            contact: document.getElementById('contact').value,
-            file_number: document.getElementById('fileNumber').value,
-            assessment_date: (assessmentDate && assessmentDate.value) || '',
-            npo_status: (npoStatus && npoStatus.value) || '',
-            asa_class: asaClass || '',
+            age: numOrNull(age.value),
+            sex: document.getElementById('sex').value || null,
+            weight: numOrNull(weightEl.value),
+            height: numOrNull(heightEl.value),
+            bmi: bmiVal ? bmiVal : null,
+            contact: document.getElementById('contact').value || null,
+            file_number: document.getElementById('fileNumber').value || null,
+            assessment_date: (assessmentDate && assessmentDate.value) || null,
+            npo_status: (npoStatus && npoStatus.value) || null,
+            asa_class: asaClass || null,
             family_mh: isChecked(familyMH),
-            prev_anesthesia: (prevAnesthesia && prevAnesthesia.value) || '',
+            prev_anesthesia: (prevAnesthesia && prevAnesthesia.value) || null,
             hypertension: isChecked(hypertension),
             diabetes: isChecked(diabetes),
             cad: isChecked(cad),
@@ -422,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             murmur: isChecked(murmur),
             carotid_bruit: isChecked(carotidBruit),
             anticoagulants: isChecked(anticoagulants),
-            other_medical: document.getElementById('otherMedical').value,
+            other_medical: document.getElementById('otherMedical').value || null,
             sleep_apnea: isChecked(sleepApnea),
             gerd: isChecked(document.getElementById('gerd')),
             chest_pain: isChecked(chestPain),
@@ -431,18 +443,18 @@ document.addEventListener('DOMContentLoaded', () => {
             syncope: isChecked(syncope),
             fatigue: isChecked(fatigue),
             no_symptoms: isChecked(noSymptoms),
-            bp_systolic: bpSystolic.value,
-            bp_diastolic: document.getElementById('bpDiastolic').value,
-            heart_rate: document.getElementById('heartRate').value,
-            resp_rate: document.getElementById('respRate').value,
-            spo2: document.getElementById('spo2').value,
-            temperature: document.getElementById('temperature').value,
-            medications: medsTextarea.value,
-            allergies: document.getElementById('allergies').value,
-            smoking: smoking.value,
-            alcohol: alcoholEl.value,
-            surgical_history: document.getElementById('surgicalHistory').value,
-            dental: document.getElementById('dental').value,
+            bp_systolic: numOrNull(bpSystolic.value),
+            bp_diastolic: numOrNull(document.getElementById('bpDiastolic').value),
+            heart_rate: numOrNull(document.getElementById('heartRate').value),
+            resp_rate: numOrNull(document.getElementById('respRate').value),
+            spo2: numOrNull(document.getElementById('spo2').value),
+            temperature: numOrNull(document.getElementById('temperature').value),
+            medications: medsTextarea.value || null,
+            allergies: document.getElementById('allergies').value || null,
+            smoking: smoking.value || null,
+            alcohol: alcoholEl.value || null,
+            surgical_history: document.getElementById('surgicalHistory').value || null,
+            dental: document.getElementById('dental').value || null,
             cardio_consult: false,
             neuro_consult: false,
             echo: false,
@@ -454,10 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pulmonary_consult: false
         };
 
-        const cleanRecord = sanitizeRecord(record);
-        
         try {
-            const { error } = await supabase.from('assessments').insert([cleanRecord]);
+            const { error } = await supabase.from('assessments').insert([record]);
             if (error) throw error;
             const t = translations[langSelect.value];
             statusMsg.innerText = (t && t['success']) || '✅ Data saved successfully!';
@@ -473,11 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const t = translations[langSelect.value];
             statusMsg.innerText = (t && t['error']) || '❌ Error saving data.';
             statusMsg.style.color = 'var(--danger)';
-            console.error(error);
+            console.error('Supabase insert error:', error);
         }
     });
 
     window.onscroll = () => header.classList.toggle('scrolled', window.scrollY > 50);
-    updateBMI(); updateASA(); updateProgress(); loadFromLS();
+    updateBMI(); updateASA(); updateProgress();
     setTimeout(() => { updateBMI(); updateASA(); updateProgress(); }, 100);
 });
