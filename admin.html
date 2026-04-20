@@ -19,6 +19,10 @@
         button { background: #2c6e9e; color: white; cursor: pointer; border: none; }
         button:hover { background: #1b4f72; }
         .delete-btn { background: #c0392b; }
+        .invite-form { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .note { font-size: 12px; color: #7f8c8d; margin-top: 5px; }
+        .success { color: #27ae60; }
+        .error { color: #c0392b; }
     </style>
 </head>
 <body>
@@ -39,21 +43,32 @@
         </div>
         <button id="exportAllExcel">📊 Export All Assessments to Excel</button>
 
+        <!-- Invite New Doctor Section -->
         <div class="section">
-            <h3>Manage Doctors</h3>
-            <form id="add-doctor-form">
-                <input type="text" id="doc-userid" placeholder="User UUID (from Auth)" required>
-                <input type="email" id="doc-email" placeholder="Email" required>
-                <input type="text" id="doc-name" placeholder="Full Name" required>
-                <button type="submit">Add Doctor</button>
-            </form>
-            <p><small>Note: First create user in Supabase Auth → Users → Add User. Then use the UUID and email here.</small></p>
+            <h3>Invite New Doctor</h3>
+            <div class="invite-form">
+                <form id="invite-doctor-form">
+                    <input type="email" id="invite-email" placeholder="Doctor's Email" required>
+                    <input type="text" id="invite-name" placeholder="Full Name" required>
+                    <label style="display: inline-block; margin: 0 10px;">
+                        <input type="checkbox" id="invite-admin"> Grant admin privileges
+                    </label>
+                    <button type="submit">Send Invitation</button>
+                </form>
+                <p class="note">✅ An email will be sent with a link to set their password. They'll be automatically added to the doctors list upon acceptance.</p>
+            </div>
+        </div>
+
+        <!-- Manage Doctors Table -->
+        <div class="section">
+            <h3>Current Doctors</h3>
             <table id="doctors-table">
-                <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Status</th><th>Actions</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
 
+        <!-- All Assessments -->
         <div class="section">
             <h3>All Assessments</h3>
             <input type="text" id="search" placeholder="Search by name or file number..." style="width: 300px;">
@@ -67,11 +82,20 @@
 
 <script type="module">
     import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+    
+    // Initialize Supabase client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentAdmin = null;
     let allAssessments = [];
 
+    // -------------------- Helper: Get current session --------------------
+    async function getSession() {
+        const { data: { session } } = await supabase.auth.getSession();
+        return session;
+    }
+
+    // -------------------- Login --------------------
     async function login(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -89,46 +113,84 @@
         return data;
     }
 
+    // -------------------- Load Doctors --------------------
     async function loadDoctors() {
-        const { data, error } = await supabase.from('doctors').select('*');
-        if (error) throw error;
+        const { data, error } = await supabase.from('doctors').select('*').order('created_at', { ascending: false });
+        if (error) {
+            console.error(error);
+            return;
+        }
         const tbody = document.querySelector('#doctors-table tbody');
         tbody.innerHTML = '';
         data.forEach(doc => {
             const row = tbody.insertRow();
             row.insertCell(0).innerText = doc.email;
-            row.insertCell(1).innerText = doc.full_name;
+            row.insertCell(1).innerText = doc.full_name || '—';
             row.insertCell(2).innerText = doc.is_admin ? 'Yes' : 'No';
-            const actions = row.insertCell(3);
-            const delBtn = document.createElement('button');
-            delBtn.innerText = 'Delete';
-            delBtn.className = 'delete-btn';
-            delBtn.onclick = () => deleteDoctor(doc.id);
-            actions.appendChild(delBtn);
+            row.insertCell(3).innerText = doc.status || 'active';
+            const actions = row.insertCell(4);
+            
+            // Delete button (cannot delete yourself)
+            if (doc.id !== currentAdmin.id) {
+                const delBtn = document.createElement('button');
+                delBtn.innerText = 'Delete';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => deleteDoctor(doc.id);
+                actions.appendChild(delBtn);
+            } else {
+                actions.innerText = '—';
+            }
         });
     }
 
     async function deleteDoctor(doctorId) {
         if (!confirm('Delete this doctor? They will lose access.')) return;
-        const { error } = await supabase.from('doctors').delete().eq('id', doctorId);
-        if (error) alert(error.message);
-        else loadDoctors();
+        // First delete from doctors table (RLS allows admin)
+        const { error: dbError } = await supabase.from('doctors').delete().eq('id', doctorId);
+        if (dbError) {
+            alert('Error deleting doctor record: ' + dbError.message);
+            return;
+        }
+        // Optionally delete the Auth user – requires service_role key, so we skip for simplicity.
+        // The user will remain in Auth but without a doctors record they can't log in.
+        loadDoctors();
     }
 
-    async function addDoctor(userId, email, fullName) {
-        const { error } = await supabase
-            .from('doctors')
-            .insert([{ id: userId, email, full_name: fullName, is_admin: false }]);
-        if (error) alert(error.message);
-        else loadDoctors();
+    // -------------------- Invite Doctor (Edge Function) --------------------
+    async function inviteDoctor(email, fullName, isAdmin) {
+        const session = await getSession();
+        if (!session) throw new Error('Not authenticated');
+        
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/invite-doctor`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({ 
+                email, 
+                full_name: fullName, 
+                is_admin: isAdmin 
+            })
+        });
+        
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Invitation failed');
+        }
+        return result;
     }
 
+    // -------------------- Assessments --------------------
     async function loadAllAssessments() {
         const { data, error } = await supabase
             .from('assessments')
             .select('*')
             .order('assessment_date', { ascending: false });
-        if (error) throw error;
+        if (error) {
+            console.error(error);
+            return;
+        }
         allAssessments = data;
         renderAllAssessments(data);
     }
@@ -136,35 +198,45 @@
     function renderAllAssessments(data) {
         const tbody = document.querySelector('#all-assessments-table tbody');
         tbody.innerHTML = '';
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="6">No assessments found.</td></tr>';
+            return;
+        }
         data.forEach(a => {
             const row = tbody.insertRow();
             row.insertCell(0).innerText = a.name;
-            row.insertCell(1).innerText = a.file_number || '';
-            row.insertCell(2).innerText = a.assessment_date;
-            row.insertCell(3).innerText = a.asa_class || '';
-            row.insertCell(4).innerText = a.bmi || '';
+            row.insertCell(1).innerText = a.file_number || '—';
+            row.insertCell(2).innerText = a.assessment_date || '—';
+            row.insertCell(3).innerText = a.asa_class || '—';
+            row.insertCell(4).innerText = a.bmi || '—';
             row.insertCell(5).innerText = new Date(a.created_at).toLocaleString();
         });
     }
 
+    // -------------------- Export Excel --------------------
     async function exportAllToExcel() {
         const { data, error } = await supabase.from('assessments').select('*');
-        if (error) return alert(error.message);
+        if (error) {
+            alert('Error fetching data: ' + error.message);
+            return;
+        }
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Assessments');
-        XLSX.writeFile(wb, `all_assessments_${new Date().toISOString()}.xlsx`);
+        XLSX.writeFile(wb, `all_assessments_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // Search filter
+    // -------------------- Search Filter --------------------
     document.getElementById('search').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = allAssessments.filter(a => 
-            a.name.toLowerCase().includes(term) || (a.file_number && a.file_number.toLowerCase().includes(term))
+            (a.name && a.name.toLowerCase().includes(term)) || 
+            (a.file_number && a.file_number.toLowerCase().includes(term))
         );
         renderAllAssessments(filtered);
     });
 
+    // -------------------- Event Listeners --------------------
     // Login
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -182,16 +254,32 @@
         }
     });
 
-    document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
+    // Invite doctor form
+    document.getElementById('invite-doctor-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userId = document.getElementById('doc-userid').value.trim();
-        const email = document.getElementById('doc-email').value.trim();
-        const name = document.getElementById('doc-name').value.trim();
-        await addDoctor(userId, email, name);
+        const email = document.getElementById('invite-email').value.trim();
+        const name = document.getElementById('invite-name').value.trim();
+        const isAdmin = document.getElementById('invite-admin').checked;
+        
+        try {
+            const result = await inviteDoctor(email, name, isAdmin);
+            alert(`✅ Invitation sent to ${email}`);
+            e.target.reset();
+            // Reload doctors list (the new doctor may not appear until they accept invite)
+            loadDoctors();
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+        }
     });
 
+    // Export
     document.getElementById('exportAllExcel').onclick = exportAllToExcel;
-    document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
+    
+    // Logout
+    document.getElementById('logoutBtn').onclick = async () => {
+        await supabase.auth.signOut();
+        location.reload();
+    };
 </script>
 </body>
 </html>
