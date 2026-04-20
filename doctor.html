@@ -59,11 +59,12 @@
     <div id="admin-panel" class="admin-section" style="display:none;">
         <h3>Admin Panel – Manage Doctors</h3>
         <form id="add-doctor-form">
+            <input type="text" id="new-userid" placeholder="User UUID (from Auth)" required>
             <input type="email" id="new-email" placeholder="Doctor Email" required>
             <input type="text" id="new-name" placeholder="Full Name" required>
             <button type="submit">Add Doctor</button>
         </form>
-        <p class="note">⚠️ Doctor must first exist in Supabase Auth (Authentication → Users → Add User). Then use same email here.</p>
+        <p class="note">⚠️ First create user in Supabase Auth → Users → Add User. Then use the UUID and email here.</p>
         <table id="doctors-table">
             <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
             <tbody></tbody>
@@ -72,10 +73,8 @@
 </div>
 <div id="toast" class="toast"></div>
 
-<script>
-    // Supabase credentials (replace with your actual values)
-    const SUPABASE_URL = 'https://frzbxuefdycxaeoibkmc.supabase.co';
-    const SUPABASE_ANON_KEY = 'your-anon-key'; // REPLACE
+<script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentDoctor = null;
@@ -90,20 +89,13 @@
     }
 
     async function loadDoctorProfile(userId) {
-        // Fetch doctor record from the doctors table
         const { data, error } = await supabase
             .from('doctors')
             .select('*')
             .eq('id', userId)
             .maybeSingle();
-
         if (error) throw error;
-
-        if (!data) {
-            // Doctor record missing – show error and logout
-            throw new Error('No doctor profile found. Please contact admin.');
-        }
-
+        if (!data) throw new Error('No doctor profile found. Please contact admin.');
         currentDoctor = data;
         document.getElementById('doctor-name').innerText = data.full_name;
         if (data.is_admin) {
@@ -120,13 +112,11 @@
         else if (filter === 'week') startDate = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
         else if (filter === 'month') startDate = new Date(Date.now() - 30*86400000).toISOString().split('T')[0];
         
-        let query = supabase
+        const { data, error } = await supabase
             .from('assessments')
             .select('*')
             .gte('assessment_date', startDate)
             .order('assessment_date', { ascending: false });
-        
-        const { data, error } = await query;
         if (error) throw error;
         currentData = data;
         renderTable(data);
@@ -236,20 +226,15 @@
         else loadDoctors();
     }
 
-    async function addDoctor(email, fullName) {
-        // First, check if the user exists in auth.users
-        // We need to fetch the user ID using admin API – but client-side cannot do that.
-        // Instead, we ask the admin to create the user in Auth dashboard first.
-        // Then the admin can manually insert the record via SQL or we can try to fetch by email.
-        // For simplicity, we'll assume the user already exists in auth, and we'll attempt to get their ID via a query.
-        // This is not possible with anon key, so we'll show a helpful error.
-        alert('Please create the user first in Supabase Authentication → Users → Add User. Then insert their record manually via SQL Editor, or contact your developer.');
-        return;
-
-        // If you have a server-side endpoint, you could implement it. For now, manual insert is safest.
+    async function addDoctor(userId, email, fullName) {
+        const { error } = await supabase
+            .from('doctors')
+            .insert([{ id: userId, email, full_name: fullName, is_admin: false }]);
+        if (error) alert(error.message);
+        else loadDoctors();
     }
 
-    // Login flow
+    // Event listeners
     document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
@@ -273,14 +258,13 @@
     document.getElementById('exportExcelBtn').onclick = exportToExcel;
     document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
 
-    if (document.getElementById('add-doctor-form')) {
-        document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('new-email').value;
-            const name = document.getElementById('new-name').value;
-            await addDoctor(email, name);
-        });
-    }
+    document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('new-userid').value.trim();
+        const email = document.getElementById('new-email').value.trim();
+        const name = document.getElementById('new-name').value.trim();
+        await addDoctor(userId, email, name);
+    });
 </script>
 </body>
 </html>
