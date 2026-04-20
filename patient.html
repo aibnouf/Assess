@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://unpkg.com/@supabase/functions-js@latest/dist/umd/index.js"></script>
-    <script type="module"> import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js'; const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</script>
+    <style>
+        /* Additional styles inline if needed – main styles in style.css */
+    </style>
 </head>
 <body>
     <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
@@ -159,11 +159,12 @@
                     <div id="autosave-badge" class="autosave-badge" style="display:none;"><i class="fas fa-cloud-check"></i> <span id="autosave-text">تم الحفظ التلقائي</span></div>
                 </form>
             </div>
-            <!-- NO RECOMMENDATIONS PANEL HERE -->
         </div>
     </main>
 
     <button id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
     <footer><div class="container"><p><strong>فريق التخدير</strong> – نحن هنا لمساعدتك</p></div></footer>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
