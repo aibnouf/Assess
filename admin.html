@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="script.js"></script>
     <style>
         body { background: #f0f2f5; font-family: Arial, sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -43,34 +42,33 @@
         <div class="section">
             <h3>Manage Doctors</h3>
             <form id="add-doctor-form">
+                <input type="text" id="doc-userid" placeholder="User UUID (from Auth)" required>
                 <input type="email" id="doc-email" placeholder="Email" required>
                 <input type="text" id="doc-name" placeholder="Full Name" required>
-                <select id="doc-shift">
-                    <option value="Morning">Morning</option>
-                    <option value="Evening">Evening</option>
-                </select>
-                <input type="email" id="doc-notify" placeholder="Notification Email (optional)">
                 <button type="submit">Add Doctor</button>
             </form>
+            <p><small>Note: First create user in Supabase Auth → Users → Add User. Then use the UUID and email here.</small></p>
             <table id="doctors-table">
-                <thead><tr><th>Email</th><th>Name</th><th>Shift</th><th>Admin</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Email</th><th>Name</th><th>Admin</th><th>Actions</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <p><small>Note: To add a doctor, first create the user in Supabase Auth (Authentication → Users → Add User). Then use the same email here to link the doctor record.</small></p>
         </div>
 
         <div class="section">
-            <h3>All Assessments (All Shifts)</h3>
+            <h3>All Assessments</h3>
             <input type="text" id="search" placeholder="Search by name or file number..." style="width: 300px;">
             <table id="all-assessments-table">
-                <thead><tr><th>Name</th><th>File #</th><th>Shift</th><th>Date</th><th>ASA</th><th>BMI</th><th>Created At</th></tr></thead>
+                <thead><tr><th>Name</th><th>File #</th><th>Date</th><th>ASA</th><th>BMI</th><th>Created At</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let currentAdmin = null;
     let allAssessments = [];
 
@@ -100,9 +98,8 @@
             const row = tbody.insertRow();
             row.insertCell(0).innerText = doc.email;
             row.insertCell(1).innerText = doc.full_name;
-            row.insertCell(2).innerText = doc.shift;
-            row.insertCell(3).innerText = doc.is_admin ? 'Yes' : 'No';
-            const actions = row.insertCell(4);
+            row.insertCell(2).innerText = doc.is_admin ? 'Yes' : 'No';
+            const actions = row.insertCell(3);
             const delBtn = document.createElement('button');
             delBtn.innerText = 'Delete';
             delBtn.className = 'delete-btn';
@@ -118,17 +115,10 @@
         else loadDoctors();
     }
 
-    async function addDoctor(email, fullName, shift, notificationEmail) {
-        // We need the user ID from auth. If user doesn't exist, show error.
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail?.(email);
-        if (userError || !userData) {
-            alert('User not found in Auth. Please create the user first in Supabase Auth → Users → Add User.');
-            return;
-        }
-        const userId = userData.user.id;
+    async function addDoctor(userId, email, fullName) {
         const { error } = await supabase
             .from('doctors')
-            .insert([{ id: userId, email, full_name: fullName, shift, notification_email: notificationEmail, is_admin: false }]);
+            .insert([{ id: userId, email, full_name: fullName, is_admin: false }]);
         if (error) alert(error.message);
         else loadDoctors();
     }
@@ -150,11 +140,10 @@
             const row = tbody.insertRow();
             row.insertCell(0).innerText = a.name;
             row.insertCell(1).innerText = a.file_number || '';
-            row.insertCell(2).innerText = a.shift;
-            row.insertCell(3).innerText = a.assessment_date;
-            row.insertCell(4).innerText = a.asa_class || '';
-            row.insertCell(5).innerText = a.bmi || '';
-            row.insertCell(6).innerText = new Date(a.created_at).toLocaleString();
+            row.insertCell(2).innerText = a.assessment_date;
+            row.insertCell(3).innerText = a.asa_class || '';
+            row.insertCell(4).innerText = a.bmi || '';
+            row.insertCell(5).innerText = new Date(a.created_at).toLocaleString();
         });
     }
 
@@ -195,15 +184,14 @@
 
     document.getElementById('add-doctor-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('doc-email').value;
-        const name = document.getElementById('doc-name').value;
-        const shift = document.getElementById('doc-shift').value;
-        const notify = document.getElementById('doc-notify').value;
-        await addDoctor(email, name, shift, notify);
+        const userId = document.getElementById('doc-userid').value.trim();
+        const email = document.getElementById('doc-email').value.trim();
+        const name = document.getElementById('doc-name').value.trim();
+        await addDoctor(userId, email, name);
     });
 
     document.getElementById('exportAllExcel').onclick = exportAllToExcel;
-    document.getElementById('logoutBtn').onclick = () => logout().then(() => location.reload());
+    document.getElementById('logoutBtn').onclick = () => supabase.auth.signOut().then(() => location.reload());
 </script>
 </body>
 </html>
