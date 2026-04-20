@@ -294,6 +294,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const opt = document.getElementById(id);
             if (opt) opt.innerText = t[id] || fallback[id] || id;
         });
+
+
+        function sanitizeRecord(record) {
+    const numericFields = [
+        'age', 'weight', 'height', 'bmi',
+        'bp_systolic', 'bp_diastolic', 'heart_rate',
+        'resp_rate', 'spo2', 'temperature'
+    ];
+    
+    const sanitized = { ...record };
+    
+    numericFields.forEach(field => {
+        if (sanitized[field] === '' || sanitized[field] === undefined) {
+            sanitized[field] = null;
+        }
+    });
+    
+    return sanitized;
+}
+        
         const submitEl = document.getElementById('submit-btn');
         if (submitEl) submitEl.innerHTML = `<i class="fas fa-save"></i> <span id="submit-btn-text">${t['submit-btn']||'Save'}</span>`;
         const scanEl = document.getElementById('scan-btn-text');
@@ -434,8 +454,10 @@ document.addEventListener('DOMContentLoaded', () => {
             pulmonary_consult: false
         };
 
+        const cleanRecord = sanitizeRecord(record);
+        
         try {
-            const { error } = await supabase.from('assessments').insert([record]);
+            const { error } = await supabase.from('assessments').insert([cleanRecord]);
             if (error) throw error;
             const t = translations[langSelect.value];
             statusMsg.innerText = (t && t['success']) || '✅ Data saved successfully!';
